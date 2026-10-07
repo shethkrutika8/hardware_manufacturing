@@ -54,19 +54,13 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/logo.png
-    - assets/images/BuildTech_hardware_picture.png
-    - assets/images/About_us.png
-    - assets/images/toolkit.png
-    - assets/images/Hathodi.PNG
-    - assets/images/HEX_NUT.PNG
-    - assets/images/lader.PNG
-    - assets/images/3.PNG
-    - assets/images/4.PNG
-    - assets/images/5.PNG
-    - assets/images/6.PNG
-    - assets/images/Capture.PNG
-    - assets/images/pakkad.png
+    - assets/images/
+    - assets/icons/
+    - assets/fonts/
+    - assets/audio/
+    - assets/video/
+    - assets/data/
+    - assets/animations/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

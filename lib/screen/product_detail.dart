@@ -1,231 +1,236 @@
 import 'package:flutter/material.dart';
+import 'package:hardware_manufacturing/screen/cart_store.dart';
+import 'package:hardware_manufacturing/screen/common_widgets.dart';
+import 'package:hardware_manufacturing/screen/product_model.dart';
 
-class ProductDetailsPage extends StatelessWidget {
-  const ProductDetailsPage({super.key});
+class ProductDetailsPage extends StatefulWidget {
+  const ProductDetailsPage({super.key, required this.product});
+
+  final Product product;
+
+  @override
+  State<ProductDetailsPage> createState() => _ProductDetailsPageState();
+}
+
+class _ProductDetailsPageState extends State<ProductDetailsPage> {
+  int quantity = 1;
+
+  Product get product => widget.product;
+
+  void _addToCart({required bool goToCart}) {
+    CartStore.addProduct(product, quantity);
+    if (goToCart) {
+      Navigator.pushNamed(context, '/cart');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${product.name} added to cart')),
+      );
+    }
+  }
+
+  List<List<String>> get _specRows => [
+        ['Size', product.size],
+        ['Material', product.material],
+        ['Thread Type', product.threadType],
+        ['Head Type', product.headType],
+        ['Finish', product.finish],
+        ['Grade', product.grade],
+        ['Application', product.application],
+      ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-
-      // ---------------- APP BAR ----------------
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: const Text(
-          "Product Details",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
+    return BluePageScaffold(
+      drawer: false,
+      appBar: BuildTechAppBar(
+        showBackButton: true,
+        titleText: 'Product Details',
+        onBack: () => Navigator.pop(context),
         actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.favorite_border,
-              color: Colors.black87,
-              size: 21,
-            ),
-            onPressed: () {},
-          ),
+          WishlistHeartButton(productId: product.id, size: 20, color: Colors.black87),
           IconButton(
             icon: const Icon(Icons.share, color: Colors.black87, size: 20),
-            onPressed: () {},
+            tooltip: 'Share',
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Share ${product.name} (demo)')),
+              );
+            },
           ),
         ],
       ),
-
-      // ---------------- BODY ----------------
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ---------------- PRODUCT IMAGE ----------------
-            Container(
-              width: double.infinity,
-              height: 140,
-              color: Colors.white,
-              child: Image.asset('assets/bolt.png', fit: BoxFit.contain),
-            ),
-
-            // ---------------- PRODUCT INFORMATION ----------------
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(15, 14, 15, 12),
-              color: const Color(0xFF568BB7),
-
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Hex Nut",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 2),
-
-                  const Text(
-                    "M12",
-                    style: TextStyle(color: Colors.white, fontSize: 9),
-                  ),
-
-                  const SizedBox(height: 2),
-
-                  const Text(
-                    "BuildTech Hardware",
-                    style: TextStyle(color: Colors.white, fontSize: 9),
-                  ),
-
-                  const SizedBox(height: 2),
-
-                  const Text(
-                    "Rs. 150/PCS (Incl. of GST)",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 3),
-
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                        child: const Text(
-                          "In Stock",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 7,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(width: 7),
-
-                      const Text(
-                        "(325 Pcs available)",
-                        style: TextStyle(color: Colors.white, fontSize: 7),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // ---------------- SPECIFICATION TITLE ----------------
-            Container(
-              color: const Color(0xFF568BB7),
-              width: double.infinity,
-              padding: const EdgeInsets.only(left: 15, right: 15, bottom: 4),
-              child: const Text(
-                "Product Specification",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-
-            // ---------------- SPECIFICATION TABLE ----------------
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 15),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade700, width: 0.7),
-              ),
-              child: Column(
-                children: [
-                  specificationRow("SKU", "BT-HB-M12-40"),
-
-                  specificationRow("Brand", "BuildTech"),
-
-                  specificationRow("Material", "Stainless Steel"),
-
-                  specificationRow("Size", "M12"),
-
-                  specificationRow("Thread Type", "Full Thread"),
-
-                  specificationRow("Head Type", "Hexagonal"),
-
-                  specificationRow("Finish", "Zinc Plated"),
-
-                  specificationRow("Weight", "45.50g/Pcs"),
-
-                  specificationRow("Load Capacity", "8.8 Grade"),
-
-                  specificationRow(
-                    "Warranty",
-                    "12 Month Manufacturing Warranty",
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 10),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ---------------- TABLE ROW ----------------
-  static Widget specificationRow(String title, String value) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Colors.grey.shade600, width: 0.5),
-        ),
-      ),
-      child: Row(
+      body: ListView(
+        padding: EdgeInsets.zero,
         children: [
-          // LEFT COLUMN
-          Expanded(
-            flex: 4,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-              decoration: BoxDecoration(
-                border: Border(
-                  right: BorderSide(color: Colors.grey.shade600, width: 0.5),
-                ),
-              ),
-              child: Text(
-                title,
-                style: const TextStyle(fontSize: 7.5, color: Colors.black87),
-              ),
+          Container(
+            width: double.infinity,
+            height: 230,
+            color: const Color(0xfff4f6f8),
+            padding: const EdgeInsets.all(16),
+            child: AppAssetImage(
+              path: product.image,
+              fit: BoxFit.contain,
             ),
           ),
-
-          // RIGHT COLUMN
-          Expanded(
-            flex: 6,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-              child: Text(
-                value,
-                style: const TextStyle(fontSize: 7.5, color: Colors.black87),
-              ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  product.name,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  product.size,
+                  style: const TextStyle(fontSize: 10, color: Colors.white),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${product.material} | ${product.threadType}',
+                  style: const TextStyle(fontSize: 10, color: Colors.white),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    StockPill(
+                      product.stock.startsWith('In Stock') ? 'In Stock' : product.stock,
+                      fontSize: 8,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      product.price,
+                      style: const TextStyle(fontSize: 10, color: Colors.white70),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Product Specifications',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: const Color(0xfff4f8fc),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Column(
+                    children: [
+                      for (int i = 0; i < _specRows.length; i++) ...[
+                        if (i > 0) const Divider(height: 1, thickness: 1),
+                        IntrinsicHeight(
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 110,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Text(
+                                    _specRows[i][0],
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xff33475c),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const VerticalDivider(width: 1, thickness: 1),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Text(
+                                    _specRows[i][1],
+                                    style: const TextStyle(
+                                      fontSize: 9,
+                                      color: Color(0xff33475c),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    const Text(
+                      'Qty',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () {
+                        if (quantity > 1) setState(() => quantity--);
+                      },
+                      icon: const Icon(Icons.remove_circle_outline, color: Colors.white, size: 20),
+                    ),
+                    Text(
+                      '$quantity',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () => setState(() => quantity++),
+                      icon: const Icon(Icons.add_circle_outline, color: Colors.white, size: 20),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => _addToCart(goToCart: true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kIndigo,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                        child: const Text('Add to Cart', style: TextStyle(fontSize: 12)),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          CartStore.addProduct(product, quantity);
+                          Navigator.pushNamed(context, '/checkout');
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.white),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                        child: const Text('Buy Now', style: TextStyle(fontSize: 12)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],

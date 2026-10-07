@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hardware_manufacturing/screen/common_widgets.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -8,445 +9,161 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int selectIndex = 0;
+  final List<Map<String, String?>> categories = [
+    {
+      'title': 'Power Tools',
+      'image': 'assets/images/6.PNG',
+      'category': 'Power Tools',
+    },
+    {
+      'title': 'Hand Tools',
+      'image': 'assets/images/toolkit.png',
+      'category': 'Hand Tools',
+    },
+    {
+      'title': 'Fasteners',
+      'image': 'assets/images/3.PNG',
+      'category': 'Fasteners',
+    },
+    {
+      'title': 'Abrasives',
+      // No abrasives photo supplied in assets/images yet.
+      // Add one later as e.g. assets/images/abrasives.png and register it in pubspec.yaml.
+      'image': 'assets/images/5.PNG',
+      'category': 'Abrasives',
+    },
+    {
+      'title': 'Door & Window Hardware',
+      // No door/window hardware photo supplied in assets/images yet.
+      // Add one later as e.g. assets/images/door_window.png and register it in pubspec.yaml.
+      'image': 'assets/images/6.PNG',
+      'category': 'Door & Window',
+    },
+    {
+      'title': 'Paint & Decorating Tools',
+      'image': 'assets/images/lader.png',
+      'category': 'Equipment',
+    },
+  ];
 
-  final Color blue = const Color(0xff1565a8);
-  final Color lightBlue = const Color(0xff66a3d8);
-  final Color darkBlue = const Color(0xff063a70);
+  void _openProducts({String? category}) {
+    Navigator.pushNamed(context, '/products', arguments: category);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: _buildDrawer(context),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  children: [
-                    _topTitle(),
-                    _topBar(),
-                    _banner(),
-                    _trendingCategories(),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDrawer(BuildContext context) {
-    final List<Map<String, dynamic>> menuItems = [
-      {'label': 'Home', 'icon': Icons.home_outlined, 'route': '/home'},
-      {'label': 'About Us', 'icon': Icons.info_outline, 'route': '/about'},
-      {
-        'label': 'Products',
-        'icon': Icons.grid_view_outlined,
-        'route': '/products',
-      },
-      {'label': 'Cart', 'icon': Icons.shopping_cart_outlined, 'route': '/cart'},
-      {
-        'label': 'Orders',
-        'icon': Icons.receipt_long_outlined,
-        'route': '/orders',
-      },
-      {
-        'label': 'Checkout',
-        'icon': Icons.payment_outlined,
-        'route': '/checkout',
-      },
-      {'label': 'Profile', 'icon': Icons.person_outline, 'route': '/profile'},
-      {
-        'label': 'Settings',
-        'icon': Icons.settings_outlined,
-        'route': '/settings',
-      },
-    ];
-
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
+    return BluePageScaffold(
+      body: Column(
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(color: Color(0xff1565a8)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
               children: [
-                Icon(
-                  Icons.construction_outlined,
-                  color: Colors.white,
-                  size: 34,
+                const AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: AppAssetImage(
+                    path: 'assets/images/About_us.png',
+                    fit: BoxFit.cover,
+                  ),
                 ),
-                SizedBox(height: 12),
-                Text(
-                  'BuildTech Hardware',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Trending Categories',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: kTagBlue,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => _openProducts(),
+                        child: const Text(
+                          'View More',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: kTagBlue,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 0, 14, 18),
+                  child: GridView.builder(
+                    itemCount: categories.length,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 6,
+                          childAspectRatio: 0.62,
+                        ),
+                    itemBuilder: (context, index) {
+                      return _categoryTile(categories[index]);
+                    },
                   ),
                 ),
               ],
             ),
           ),
-          ...menuItems.map(
-            (item) => ListTile(
-              leading: Icon(
-                item['icon'] as IconData,
-                color: const Color(0xff063a70),
-              ),
-              title: Text(item['label'] as String),
-              onTap: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pushNamed(item['route'] as String);
-              },
-            ),
-          ),
         ],
       ),
     );
   }
 
-  // ------------------------------------------------------------
-  // HOME PAGE TITLE
-  // ------------------------------------------------------------
-
-  Widget _topTitle() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.only(left: 28, top: 8, bottom: 8),
-      child: const Text(
-        "Home Page",
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w500,
-          color: Color(0xffc7c7c7),
-        ),
-      ),
-    );
-  }
-
-  // ------------------------------------------------------------
-  // TOP BAR
-  // ------------------------------------------------------------
-
-  Widget _topBar() {
-    return Container(
-      height: 58,
-      color: lightBlue,
-      child: Row(
-        children: [
-          const SizedBox(width: 5),
-
-          // MENU
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.menu, size: 28, color: Colors.black),
-          ),
-
-          const SizedBox(width: 2),
-
-          // LOGO
-          Container(
-            width: 126,
-            height: 42,
-            color: Colors.white,
-            padding: const EdgeInsets.all(4),
-            child: Image.asset(
-              'assets/images/logo.png',
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                return const Center(
-                  child: Icon(
-                    Icons.construction_outlined,
-                    color: Color(0xff063a70),
-                    size: 24,
-                  ),
-                );
-              },
-            ),
-          ),
-
-          const Spacer(),
-
-          // DELIVERY
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.local_shipping_outlined,
-              color: Colors.black,
-              size: 24,
-            ),
-          ),
-
-          // NOTIFICATION
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.notifications_outlined,
-              color: Colors.black,
-              size: 25,
-            ),
-          ),
-
-          // FAVORITE
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.favorite_border,
-              color: Colors.black,
-              size: 25,
-            ),
-          ),
-
-          const SizedBox(width: 2),
-        ],
-      ),
-    );
-  }
-
-  // ------------------------------------------------------------
-  // MAIN BANNER
-  // ------------------------------------------------------------
-
-  Widget _banner() {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.zero,
-        child: Image.asset(
-          'assets/images/banner.jpg',
-          width: double.infinity,
-          height: 193,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _bannerPlaceholder();
-          },
-        ),
-      ),
-    );
-  }
-
-  // If banner image is not found
-  Widget _bannerPlaceholder() {
-    return Container(
-      height: 193,
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xff071b2d), Color(0xff145783)],
-        ),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            left: 18,
-            top: 20,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "BuildTech",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                const Text(
-                  "BUILT STRONG.",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 23,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const Text(
-                  "BUILT TO LAST.",
-                  style: TextStyle(
-                    color: Color(0xffffc400),
-                    fontSize: 23,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 7),
-
-                SizedBox(
-                  width: 145,
-                  child: Text(
-                    "Precision Engineering. Superior Quality. "
-                    "Hardware Solutions You Can Trust.",
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 6,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          Positioned(
-            right: -10,
-            bottom: 0,
-            child: Icon(
-              Icons.precision_manufacturing,
-              size: 145,
-              color: Colors.white.withOpacity(0.15),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ------------------------------------------------------------
-  // TRENDING CATEGORIES
-  // ------------------------------------------------------------
-
-  Widget _trendingCategories() {
-    return Container(
-      width: double.infinity,
-      color: lightBlue,
-      padding: const EdgeInsets.only(left: 20, right: 20, top: 7, bottom: 18),
-      child: Column(
-        children: [
-          // TITLE ROW
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "Trending Categories",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Color(0xff244a72),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-
-              GestureDetector(
-                onTap: () {
-                  // View all categories
-                },
-                child: const Text(
-                  "View More",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Color(0xff244a72),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 14),
-
-          // CATEGORY GRID
-          GridView.count(
-            crossAxisCount: 2,
-            crossAxisSpacing: 17,
-            mainAxisSpacing: 10,
-            childAspectRatio: 1.28,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            children: [
-              _categoryCard(
-                image: 'assets/images/power_tools.jpg',
-                title: 'Power Tools',
-              ),
-
-              _categoryCard(
-                image: 'assets/images/hand_tools.jpg',
-                title: 'Hand Tools',
-              ),
-
-              _categoryCard(
-                image: 'assets/images/fasteners.jpg',
-                title: 'Fasteners',
-              ),
-
-              _categoryCard(
-                image: 'assets/images/abrasives.jpg',
-                title: 'Abrasives',
-              ),
-
-              _categoryCard(
-                image: 'assets/images/door_windows.jpg',
-                title: 'Door & Windows Hardware',
-              ),
-
-              _categoryCard(
-                image: 'assets/images/paint_tools.jpg',
-                title: 'Paint & Decorating Tools',
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ------------------------------------------------------------
-  // CATEGORY CARD
-  // ------------------------------------------------------------
-
-  Widget _categoryCard({required String image, required String title}) {
+  Widget _categoryTile(Map<String, String?> cat) {
+    final image = cat['image'];
     return GestureDetector(
-      onTap: () {
-        // Open category
-      },
+      onTap: () => _openProducts(category: cat['category']),
       child: Column(
         children: [
           Expanded(
             child: Container(
               width: double.infinity,
+              padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
+                color: const Color(0xfff7f9fc),
+                borderRadius: BorderRadius.circular(10),
               ),
               clipBehavior: Clip.antiAlias,
-              child: Image.asset(
-                image,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Center(
-                    child: Icon(
-                      Icons.image_outlined,
-                      size: 45,
-                      color: Colors.grey,
-                    ),
-                  );
-                },
-              ),
+              child: image == null
+                  ? const ColoredBox(
+                      color: Color(0xffe8eef5),
+                      child: Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Text(
+                            'Add matching category image later in assets/images',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  : AppAssetImage(path: image, fit: BoxFit.cover),
             ),
           ),
-
           const SizedBox(height: 6),
-
           Text(
-            title,
+            cat['title']!,
             textAlign: TextAlign.center,
-            maxLines: 2,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
               color: Colors.white,
-              fontSize: 11,
-              fontWeight: FontWeight.w400,
             ),
           ),
         ],
