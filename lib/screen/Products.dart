@@ -145,9 +145,25 @@ class _ProductsPageState extends State<ProductsPage> {
                       value: sortMode,
                       icon: const Icon(Icons.tune, size: 14, color: Color(0xff33475c)),
                       style: const TextStyle(fontSize: 10, color: Color(0xff5c6b76)),
+                      selectedItemBuilder: (context) {
+                        return _sorts.map((s) {
+                          final label = s == 'Price: Low to High'
+                              ? 'Low to High'
+                              : s == 'Price: High to Low'
+                                  ? 'High to Low'
+                                  : s;
+                          return Center(
+                            child: Text(
+                              label,
+                              style: const TextStyle(fontSize: 10, color: Color(0xff5c6b76)),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        }).toList();
+                      },
                       items: [
                         for (final sort in _sorts)
-                          DropdownMenuItem(value: sort, child: Text(sort)),
+                          DropdownMenuItem(value: sort, child: Text(sort, style: const TextStyle(fontSize: 11))),
                       ],
                       onChanged: (value) => setState(() => sortMode = value ?? 'Sort'),
                     ),

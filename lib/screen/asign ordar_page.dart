@@ -79,14 +79,17 @@ class _AssignOrdersPageState extends State<AssignOrdersPage> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           alignment: Alignment.center,
-                          child: Text(
-                            f,
-                            style: TextStyle(
-                              color: selected
-                                  ? const Color(0xFF444400)
-                                  : Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              f,
+                              style: TextStyle(
+                                color: selected
+                                    ? const Color(0xFF444400)
+                                    : Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),

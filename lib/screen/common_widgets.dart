@@ -84,17 +84,20 @@ class BuildTechLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: const AppAssetImage(
-        path: 'assets/images/logo.png',
-        fit: BoxFit.contain,
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Container(
+        width: width,
+        height: height,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: const AppAssetImage(
+          path: 'assets/images/logo.png',
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }
@@ -122,7 +125,8 @@ class BuildTechAppBar extends StatelessWidget implements PreferredSizeWidget {
     final trailing = <Widget>[
       IconButton(
         padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+        visualDensity: VisualDensity.compact,
+        constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
         icon: const Icon(
           Icons.local_shipping_outlined,
           color: Colors.black87,
@@ -140,7 +144,8 @@ class BuildTechAppBar extends StatelessWidget implements PreferredSizeWidget {
             children: [
               IconButton(
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                visualDensity: VisualDensity.compact,
+                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                 icon: const Icon(
                   Icons.shopping_bag_outlined,
                   color: Colors.black87,
@@ -151,8 +156,8 @@ class BuildTechAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               if (count > 0)
                 Positioned(
-                  right: 4,
-                  top: 4,
+                  right: 2,
+                  top: 2,
                   child: Container(
                     padding: const EdgeInsets.all(3),
                     decoration: const BoxDecoration(
@@ -187,7 +192,8 @@ class BuildTechAppBar extends StatelessWidget implements PreferredSizeWidget {
             children: [
               IconButton(
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                visualDensity: VisualDensity.compact,
+                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                 icon: const Icon(
                   Icons.favorite_border,
                   color: Colors.black87,
@@ -198,8 +204,8 @@ class BuildTechAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               if (count > 0)
                 Positioned(
-                  right: 3,
-                  top: 4,
+                  right: 2,
+                  top: 2,
                   child: Container(
                     padding: const EdgeInsets.all(3),
                     decoration: const BoxDecoration(
@@ -234,7 +240,8 @@ class BuildTechAppBar extends StatelessWidget implements PreferredSizeWidget {
             children: [
               IconButton(
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                visualDensity: VisualDensity.compact,
+                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                 icon: const Icon(
                   Icons.notifications_none,
                   color: Colors.black87,
@@ -245,8 +252,8 @@ class BuildTechAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               if (unread > 0)
                 Positioned(
-                  right: 3,
-                  top: 4,
+                  right: 2,
+                  top: 2,
                   child: Container(
                     padding: const EdgeInsets.all(3),
                     decoration: const BoxDecoration(
@@ -274,7 +281,8 @@ class BuildTechAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       IconButton(
         padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+        visualDensity: VisualDensity.compact,
+        constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
         icon: const Icon(Icons.person_outline, color: Colors.black87, size: 18),
         tooltip: 'Profile',
         onPressed: () => Navigator.pushNamed(context, '/profile'),
@@ -294,9 +302,10 @@ class BuildTechAppBar extends StatelessWidget implements PreferredSizeWidget {
                 if (showBackButton)
                   IconButton(
                     padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
                     constraints: const BoxConstraints(
-                      minWidth: 32,
-                      minHeight: 32,
+                      minWidth: 28,
+                      minHeight: 28,
                     ),
                     icon: const Icon(
                       Icons.arrow_back,
@@ -309,9 +318,10 @@ class BuildTechAppBar extends StatelessWidget implements PreferredSizeWidget {
                   Builder(
                     builder: (ctx) => IconButton(
                       padding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
                       constraints: const BoxConstraints(
-                        minWidth: 32,
-                        minHeight: 32,
+                        minWidth: 28,
+                        minHeight: 28,
                       ),
                       icon: const Icon(
                         Icons.menu,
@@ -339,22 +349,25 @@ class BuildTechAppBar extends StatelessWidget implements PreferredSizeWidget {
                 else
                   Expanded(
                     child: Center(
-                      child: GestureDetector(
-                        onTap: () => Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          '/home',
-                          (route) => false,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: GestureDetector(
+                          onTap: () => Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            '/home',
+                            (route) => false,
+                          ),
+                          child: const BuildTechLogo(),
                         ),
-                        child: const BuildTechLogo(),
                       ),
                     ),
                   ),
                 ...?actions,
                 if (actions == null || actions!.isEmpty) ...[
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 2),
                   ...trailing.map(
                     (item) => Padding(
-                      padding: const EdgeInsets.only(left: 2),
+                      padding: const EdgeInsets.only(left: 1),
                       child: item,
                     ),
                   ),

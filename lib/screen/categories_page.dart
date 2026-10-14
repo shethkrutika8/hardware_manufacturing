@@ -7,7 +7,7 @@ class CategoriesPage extends StatelessWidget {
   final List<String> categories = const [
     'Power Tools',
     'Hand Tools',
-    'Fasteners',
+    'Fasteners', 
     'Plumbing',
     'Electrical',
     'Safety',

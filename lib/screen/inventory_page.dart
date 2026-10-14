@@ -128,12 +128,15 @@ class _InventoryPageState extends State<InventoryPage> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Center(
-          child: Text(
-            filter,
-            style: TextStyle(
-              color: isSelected ? const Color(0xFF333300) : Colors.white,
-              fontSize: 12,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              filter,
+              style: TextStyle(
+                color: isSelected ? const Color(0xFF333300) : Colors.white,
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              ),
             ),
           ),
         ),

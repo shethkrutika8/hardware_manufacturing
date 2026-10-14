@@ -144,35 +144,37 @@ class AboutUsPage extends StatelessWidget {
                   color: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     vertical: 8,
-                    horizontal: 6,
+                    horizontal: 10,
                   ),
-                  child: Row(
-                    children: [
-                      for (final item in _strip)
-                        Expanded(
-                          child: Row(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (int i = 0; i < _strip.length; i++) ...[
+                          if (i > 0) const SizedBox(width: 14),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                item['icon'] as IconData,
+                                _strip[i]['icon'] as IconData,
                                 size: 16,
                                 color: const Color(0xff2f7fd6),
                               ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  item['label'] as String,
-                                  style: const TextStyle(
-                                    fontSize: 6.5,
-                                    color: Color(0xff33475c),
-                                    height: 1.3,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                              const SizedBox(width: 6),
+                              Text(
+                                _strip[i]['label'] as String,
+                                style: const TextStyle(
+                                  fontSize: 8,
+                                  color: Color(0xff33475c),
+                                  height: 1.3,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                    ],
+                        ],
+                      ],
+                    ),
                   ),
                 ),
                 Padding(
