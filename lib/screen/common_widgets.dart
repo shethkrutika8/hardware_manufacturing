@@ -3,6 +3,9 @@ import 'package:hardware_manufacturing/screen/cart_store.dart';
 import 'package:hardware_manufacturing/screen/notification_store.dart';
 import 'package:hardware_manufacturing/screen/wishlist_store.dart';
 
+
+
+
 // Palette sampled from the reference design screenshots.
 const Color kAppBarBlue = Color(0xff6196c6);
 const Color kGradTop = Color(0xff6898cd);

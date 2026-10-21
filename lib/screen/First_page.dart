@@ -22,21 +22,17 @@ class _HomePageState extends State<HomePage> {
     },
     {
       'title': 'Fasteners',
-      'image': 'assets/images/3.PNG',
+      'image': 'assets/images/HEX_NUT.PNG',
       'category': 'Fasteners',
     },
     {
       'title': 'Abrasives',
-      // No abrasives photo supplied in assets/images yet.
-      // Add one later as e.g. assets/images/abrasives.png and register it in pubspec.yaml.
       'image': 'assets/images/5.PNG',
       'category': 'Abrasives',
     },
     {
       'title': 'Door & Window Hardware',
-      // No door/window hardware photo supplied in assets/images yet.
-      // Add one later as e.g. assets/images/door_window.png and register it in pubspec.yaml.
-      'image': 'assets/images/6.PNG',
+      'image': 'assets/images/4.PNG',
       'category': 'Door & Window',
     },
     {
@@ -59,11 +55,77 @@ class _HomePageState extends State<HomePage> {
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                const AspectRatio(
+                // Banner image: Use BuildTech hardware store image
+                AspectRatio(
                   aspectRatio: 16 / 9,
-                  child: AppAssetImage(
-                    path: 'assets/images/About_us.png',
-                    fit: BoxFit.cover,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      const AppAssetImage(
+                        path: 'assets/images/BuildTech_hardware_picture.png',
+                        fit: BoxFit.cover,
+                      ),
+                      // Gradient overlay for readability
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withValues(alpha: 0.45),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Banner text
+                      Positioned(
+                        left: 14,
+                        bottom: 14,
+                        right: 14,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'BuildTech Hardware',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black45,
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            GestureDetector(
+                              onTap: () => _openProducts(),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF5066c6),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Text(
+                                  'Shop Now',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Padding(
@@ -141,7 +203,7 @@ class _HomePageState extends State<HomePage> {
                         child: Padding(
                           padding: EdgeInsets.all(8),
                           child: Text(
-                            'Add matching category image later in assets/images',
+                            'Coming soon',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 10,

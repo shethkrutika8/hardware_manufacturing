@@ -78,17 +78,19 @@ class _ProductsPageState extends State<ProductsPage> {
               setState(() => selectedCategory = value ?? 'All Categories');
               Navigator.pop(context);
             },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (final category in _categories)
-                  RadioListTile<String>(
-                    value: category,
-                    activeColor: kIndigo,
-                    dense: true,
-                    title: Text(category, style: const TextStyle(fontSize: 12)),
-                  ),
-              ],
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final category in _categories)
+                    RadioListTile<String>(
+                      value: category,
+                      activeColor: kIndigo,
+                      dense: true,
+                      title: Text(category, style: const TextStyle(fontSize: 12)),
+                    ),
+                ],
+              ),
             ),
           ),
         );
