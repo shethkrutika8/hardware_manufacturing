@@ -444,7 +444,6 @@ class BuildTechDrawer extends StatelessWidget {
         'icon': Icons.settings_outlined,
         'route': '/settings',
       },
-      {'label': 'Categories', 'icon': Icons.category_outlined, 'route': '/categories'},
       {'label': 'Login', 'icon': Icons.login_outlined, 'route': '/login'},
       {
         'label': 'Create Account',
@@ -530,7 +529,6 @@ class AdminDrawer extends StatelessWidget {
       {'label': 'Add Product', 'icon': Icons.add_circle_outline, 'route': '/admin/add-product'},
       {'label': 'Inventory & Orders', 'icon': Icons.warehouse_outlined, 'route': '/admin/inventory'},
       {'label': 'Assign Orders', 'icon': Icons.assignment_turned_in_outlined, 'route': '/admin/assign-orders'},
-      {'label': 'Categories', 'icon': Icons.category_outlined, 'route': '/admin/categories'},
       {'label': 'Customers', 'icon': Icons.people_outline, 'route': '/admin/customers'},
       {'label': 'Delivery Staff', 'icon': Icons.delivery_dining_outlined, 'route': '/admin/delivery-staff'},
       {'label': 'Notifications', 'icon': Icons.notifications_none, 'route': '/admin/notifications'},

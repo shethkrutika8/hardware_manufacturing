@@ -8,6 +8,7 @@ import 'package:hardware_manufacturing/screen/asign_ordar_page.dart';
 import 'package:hardware_manufacturing/screen/categories_page.dart';
 import 'package:hardware_manufacturing/screen/checkout.dart';
 import 'package:hardware_manufacturing/screen/common_widgets.dart';
+import 'package:hardware_manufacturing/screen/create_account_page.dart';
 import 'package:hardware_manufacturing/screen/dashbord_page.dart';
 import 'package:hardware_manufacturing/screen/deliver_staff_page.dart';
 import 'package:hardware_manufacturing/screen/delivery_dashboard_page.dart';
@@ -72,6 +73,7 @@ class MyApp extends StatelessWidget {
         '/home': (_) => const HomePage(),
         '/login': (_) => const LoginPage(),
         '/register': (_) => const RegisterPage(),
+        '/create-account': (_) => const CreateAccountPage(),
         '/forgot-password': (_) => const ForgotPasswordPage(),
         '/about': (_) => const AboutUsPage(),
         '/products': (_) => const ProductsPage(),

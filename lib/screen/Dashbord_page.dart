@@ -117,13 +117,6 @@ class AdminDashboard extends StatelessWidget {
                 label: 'Inventory & Orders',
                 route: '/admin/inventory',
               ),
-              const SizedBox(height: 10),
-              _quickAction(
-                context,
-                icon: Icons.category_outlined,
-                label: 'Manage Categories',
-                route: '/admin/categories',
-              ),
 
               const SizedBox(height: 22),
 
