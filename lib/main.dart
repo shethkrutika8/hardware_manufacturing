@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:hardware_manufacturing/screen/about_us_page.dart';
 import 'package:hardware_manufacturing/screen/add_cart.dart';
 import 'package:hardware_manufacturing/screen/addproduct_page.dart';
-import 'package:hardware_manufacturing/screen/asign%20ordar_page.dart';
+import 'package:hardware_manufacturing/screen/admin_profile_page.dart'
+    show AdminProfilePageScreen;
+import 'package:hardware_manufacturing/screen/asign_ordar_page.dart';
 import 'package:hardware_manufacturing/screen/categories_page.dart';
 import 'package:hardware_manufacturing/screen/checkout.dart';
 import 'package:hardware_manufacturing/screen/common_widgets.dart';
-import 'package:hardware_manufacturing/screen/Dashbord_page.dart';
-import 'package:hardware_manufacturing/screen/deliver%20staff_page.dart';
-import 'package:hardware_manufacturing/screen/delivery%20dashboard_page.dart';
-import 'package:hardware_manufacturing/screen/delivery%20updates_page.dart';
+import 'package:hardware_manufacturing/screen/dashbord_page.dart';
+import 'package:hardware_manufacturing/screen/deliver_staff_page.dart';
+import 'package:hardware_manufacturing/screen/delivery_dashboard_page.dart';
+import 'package:hardware_manufacturing/screen/delivery_updates_page.dart';
 import 'package:hardware_manufacturing/screen/first_page.dart';
 import 'package:hardware_manufacturing/screen/forgot_password_page.dart';
 import 'package:hardware_manufacturing/screen/inventory_page.dart';
@@ -17,10 +19,10 @@ import 'package:hardware_manufacturing/screen/login_page.dart';
 import 'package:hardware_manufacturing/screen/myprofile.dart';
 import 'package:hardware_manufacturing/screen/notification_page.dart';
 import 'package:hardware_manufacturing/screen/notifications_page.dart';
-import 'package:hardware_manufacturing/screen/order%20details_page.dart';
-import 'package:hardware_manufacturing/screen/order_detail.dart';
-import 'package:hardware_manufacturing/screen/order_placed.dart';
 import 'package:hardware_manufacturing/screen/ordar_page.dart';
+import 'package:hardware_manufacturing/screen/order_detail.dart';
+import 'package:hardware_manufacturing/screen/order_details_page.dart';
+import 'package:hardware_manufacturing/screen/order_placed.dart';
 import 'package:hardware_manufacturing/screen/product_detail.dart';
 import 'package:hardware_manufacturing/screen/product_model.dart';
 import 'package:hardware_manufacturing/screen/product_page.dart';
@@ -28,8 +30,6 @@ import 'package:hardware_manufacturing/screen/products.dart';
 import 'package:hardware_manufacturing/screen/register_page.dart';
 import 'package:hardware_manufacturing/screen/setting.dart';
 import 'package:hardware_manufacturing/screen/wishlist_page.dart';
-import 'package:hardware_manufacturing/screen/admin%20profile_page.dart'
-    show AdminProfilePageScreen;
 
 void main() {
   runApp(const MyApp());
