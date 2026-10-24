@@ -1,4 +1,2 @@
-// This file is superseded by forgot_password_page.dart.
-// The /forgot-password route in main.dart uses ForgotPasswordPage
-// from forgot_password_page.dart.
-// This file is intentionally left empty to avoid class name duplication.
+// Backward compatibility export
+export 'package:hardware_manufacturing/screen/forgot_password_page.dart';

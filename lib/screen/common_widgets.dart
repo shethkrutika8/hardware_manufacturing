@@ -787,7 +787,12 @@ class BluePageScaffold extends StatelessWidget {
         width: double.infinity,
         height: double.infinity,
         decoration: kPageGradient,
-        child: body,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 960),
+            child: body,
+          ),
+        ),
       ),
     );
   }
@@ -817,59 +822,64 @@ class AuthPageScaffold extends StatelessWidget {
           ),
         ),
         child: SafeArea(
-          child: Column(
-            children: [
-              const SizedBox(height: 40),
-              Container(
-                width: 150,
-                height: 62,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xfff4f6fa),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const AppAssetImage(
-                  path: 'assets/images/logo.png',
-                  fit: BoxFit.contain,
-                ),
-              ),
-              const SizedBox(height: 22),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    header,
-                    const SizedBox(height: 18),
-                    const Text(
-                      'High Quality hardware solution built to last.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: kTagBlue,
-                        height: 1.4,
-                      ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: Column(
+                children: [
+                  const SizedBox(height: 40),
+                  Container(
+                    width: 150,
+                    height: 62,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 22),
-              Expanded(
-                child: Container(
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: kAuthPanel,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(26),
-                      topRight: Radius.circular(26),
+                    decoration: BoxDecoration(
+                      color: const Color(0xfff4f6fa),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const AppAssetImage(
+                      path: 'assets/images/logo.png',
+                      fit: BoxFit.contain,
                     ),
                   ),
-                  child: child,
-                ),
+                  const SizedBox(height: 22),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        header,
+                        const SizedBox(height: 18),
+                        const Text(
+                          'High Quality hardware solution built to last.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: kTagBlue,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      decoration: const BoxDecoration(
+                        color: kAuthPanel,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(26),
+                          topRight: Radius.circular(26),
+                        ),
+                      ),
+                      child: child,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
