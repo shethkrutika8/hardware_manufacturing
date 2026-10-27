@@ -3,9 +3,6 @@ import 'package:hardware_manufacturing/screen/cart_store.dart';
 import 'package:hardware_manufacturing/screen/notification_store.dart';
 import 'package:hardware_manufacturing/screen/wishlist_store.dart';
 
-
-
-
 // Palette sampled from the reference design screenshots.
 const Color kAppBarBlue = Color(0xff6196c6);
 const Color kGradTop = Color(0xff6898cd);
@@ -455,8 +452,16 @@ class BuildTechDrawer extends StatelessWidget {
         'icon': Icons.lock_reset_outlined,
         'route': '/forgot-password',
       },
-      {'label': 'Admin Panel', 'icon': Icons.admin_panel_settings_outlined, 'route': '/admin/dashboard'},
-      {'label': 'Delivery Staff Panel', 'icon': Icons.local_shipping_outlined, 'route': '/delivery/dashboard'},
+      {
+        'label': 'Admin Panel',
+        'icon': Icons.admin_panel_settings_outlined,
+        'route': '/admin/dashboard',
+      },
+      {
+        'label': 'Delivery Staff Panel',
+        'icon': Icons.local_shipping_outlined,
+        'route': '/delivery/dashboard',
+      },
     ];
 
     return Drawer(
@@ -524,15 +529,51 @@ class AdminDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final menuItems = [
-      {'label': 'Dashboard', 'icon': Icons.dashboard_outlined, 'route': '/admin/dashboard'},
-      {'label': 'Manage Products', 'icon': Icons.inventory_2_outlined, 'route': '/admin/products'},
-      {'label': 'Add Product', 'icon': Icons.add_circle_outline, 'route': '/admin/add-product'},
-      {'label': 'Inventory & Orders', 'icon': Icons.warehouse_outlined, 'route': '/admin/inventory'},
-      {'label': 'Assign Orders', 'icon': Icons.assignment_turned_in_outlined, 'route': '/admin/assign-orders'},
-      {'label': 'Customers', 'icon': Icons.people_outline, 'route': '/admin/customers'},
-      {'label': 'Delivery Staff', 'icon': Icons.delivery_dining_outlined, 'route': '/admin/delivery-staff'},
-      {'label': 'Notifications', 'icon': Icons.notifications_none, 'route': '/admin/notifications'},
-      {'label': 'Admin Profile', 'icon': Icons.account_circle_outlined, 'route': '/admin/profile'},
+      {
+        'label': 'Dashboard',
+        'icon': Icons.dashboard_outlined,
+        'route': '/admin/dashboard',
+      },
+      {
+        'label': 'Manage Products',
+        'icon': Icons.inventory_2_outlined,
+        'route': '/admin/products',
+      },
+      {
+        'label': 'Add Product',
+        'icon': Icons.add_circle_outline,
+        'route': '/admin/add-product',
+      },
+      {
+        'label': 'Inventory & Orders',
+        'icon': Icons.warehouse_outlined,
+        'route': '/admin/inventory',
+      },
+      {
+        'label': 'Assign Orders',
+        'icon': Icons.assignment_turned_in_outlined,
+        'route': '/admin/assign-orders',
+      },
+      {
+        'label': 'Customers',
+        'icon': Icons.people_outline,
+        'route': '/admin/customers',
+      },
+      {
+        'label': 'Delivery Staff',
+        'icon': Icons.delivery_dining_outlined,
+        'route': '/admin/delivery-staff',
+      },
+      {
+        'label': 'Notifications',
+        'icon': Icons.notifications_none,
+        'route': '/admin/notifications',
+      },
+      {
+        'label': 'Admin Profile',
+        'icon': Icons.account_circle_outlined,
+        'route': '/admin/profile',
+      },
     ];
 
     return Drawer(
@@ -570,7 +611,10 @@ class AdminDrawer extends StatelessWidget {
           ),
           ...menuItems.map(
             (item) => ListTile(
-              leading: Icon(item['icon'] as IconData, color: const Color(0xFF355D7C)),
+              leading: Icon(
+                item['icon'] as IconData,
+                color: const Color(0xFF355D7C),
+              ),
               title: Text(
                 item['label'] as String,
                 style: const TextStyle(fontWeight: FontWeight.w500),
@@ -584,27 +628,48 @@ class AdminDrawer extends StatelessWidget {
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.storefront_outlined, color: Color(0xFF355D7C)),
-            title: const Text('Customer Store', style: TextStyle(fontWeight: FontWeight.w500)),
+            leading: const Icon(
+              Icons.storefront_outlined,
+              color: Color(0xFF355D7C),
+            ),
+            title: const Text(
+              'Customer Store',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
             onTap: () {
               Navigator.of(context).pop();
-              Navigator.of(context).pushNamedAndRemoveUntil('/home', (r) => false);
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil('/home', (r) => false);
             },
           ),
           ListTile(
-            leading: const Icon(Icons.local_shipping_outlined, color: Color(0xFF355D7C)),
-            title: const Text('Delivery Staff Panel', style: TextStyle(fontWeight: FontWeight.w500)),
+            leading: const Icon(
+              Icons.local_shipping_outlined,
+              color: Color(0xFF355D7C),
+            ),
+            title: const Text(
+              'Delivery Staff Panel',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
             onTap: () {
               Navigator.of(context).pop();
-              Navigator.of(context).pushNamedAndRemoveUntil('/delivery/dashboard', (r) => false);
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil('/delivery/dashboard', (r) => false);
             },
           ),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Log Out', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
+            title: const Text(
+              'Log Out',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+            ),
             onTap: () {
               Navigator.of(context).pop();
-              Navigator.of(context).pushNamedAndRemoveUntil('/login', (r) => false);
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil('/login', (r) => false);
             },
           ),
         ],
@@ -619,12 +684,36 @@ class DeliveryDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final menuItems = [
-      {'label': 'Dashboard', 'icon': Icons.dashboard_outlined, 'route': '/delivery/dashboard'},
-      {'label': 'Assigned Orders', 'icon': Icons.assignment_outlined, 'route': '/delivery/assigned-orders'},
-      {'label': 'Delivery Updates', 'icon': Icons.update_outlined, 'route': '/delivery/updates'},
-      {'label': 'Order Details', 'icon': Icons.receipt_long_outlined, 'route': '/delivery/order-details'},
-      {'label': 'Notifications', 'icon': Icons.notifications_none, 'route': '/delivery/notifications'},
-      {'label': 'My Profile', 'icon': Icons.account_circle_outlined, 'route': '/delivery/profile'},
+      {
+        'label': 'Dashboard',
+        'icon': Icons.dashboard_outlined,
+        'route': '/delivery/dashboard',
+      },
+      {
+        'label': 'Assigned Orders',
+        'icon': Icons.assignment_outlined,
+        'route': '/delivery/assigned-orders',
+      },
+      {
+        'label': 'Delivery Updates',
+        'icon': Icons.update_outlined,
+        'route': '/delivery/updates',
+      },
+      {
+        'label': 'Order Details',
+        'icon': Icons.receipt_long_outlined,
+        'route': '/delivery/order-details',
+      },
+      {
+        'label': 'Notifications',
+        'icon': Icons.notifications_none,
+        'route': '/delivery/notifications',
+      },
+      {
+        'label': 'My Profile',
+        'icon': Icons.account_circle_outlined,
+        'route': '/delivery/profile',
+      },
     ];
 
     return Drawer(
@@ -662,7 +751,10 @@ class DeliveryDrawer extends StatelessWidget {
           ),
           ...menuItems.map(
             (item) => ListTile(
-              leading: Icon(item['icon'] as IconData, color: const Color(0xFF365D7B)),
+              leading: Icon(
+                item['icon'] as IconData,
+                color: const Color(0xFF365D7B),
+              ),
               title: Text(
                 item['label'] as String,
                 style: const TextStyle(fontWeight: FontWeight.w500),
@@ -676,27 +768,48 @@ class DeliveryDrawer extends StatelessWidget {
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.admin_panel_settings_outlined, color: Color(0xFF365D7B)),
-            title: const Text('Admin Panel', style: TextStyle(fontWeight: FontWeight.w500)),
+            leading: const Icon(
+              Icons.admin_panel_settings_outlined,
+              color: Color(0xFF365D7B),
+            ),
+            title: const Text(
+              'Admin Panel',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
             onTap: () {
               Navigator.of(context).pop();
-              Navigator.of(context).pushNamedAndRemoveUntil('/admin/dashboard', (r) => false);
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil('/admin/dashboard', (r) => false);
             },
           ),
           ListTile(
-            leading: const Icon(Icons.storefront_outlined, color: Color(0xFF365D7B)),
-            title: const Text('Customer Store', style: TextStyle(fontWeight: FontWeight.w500)),
+            leading: const Icon(
+              Icons.storefront_outlined,
+              color: Color(0xFF365D7B),
+            ),
+            title: const Text(
+              'Customer Store',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
             onTap: () {
               Navigator.of(context).pop();
-              Navigator.of(context).pushNamedAndRemoveUntil('/home', (r) => false);
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil('/home', (r) => false);
             },
           ),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Log Out', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
+            title: const Text(
+              'Log Out',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+            ),
             onTap: () {
               Navigator.of(context).pop();
-              Navigator.of(context).pushNamedAndRemoveUntil('/login', (r) => false);
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil('/login', (r) => false);
             },
           ),
         ],
@@ -772,11 +885,13 @@ class BluePageScaffold extends StatelessWidget {
     required this.body,
     this.appBar,
     this.drawer = true,
+    this.maxBodyWidth = 960,
   });
 
   final Widget body;
   final PreferredSizeWidget? appBar;
   final bool drawer;
+  final double maxBodyWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -789,7 +904,7 @@ class BluePageScaffold extends StatelessWidget {
         decoration: kPageGradient,
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 960),
+            constraints: BoxConstraints(maxWidth: maxBodyWidth),
             child: body,
           ),
         ),

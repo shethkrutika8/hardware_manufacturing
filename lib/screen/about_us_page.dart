@@ -34,30 +34,33 @@ class AboutUsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BluePageScaffold(
+      maxBodyWidth: 1200,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
         children: [
           _buildHero(context),
-          const SizedBox(height: 28),
+          const SizedBox(height: 32),
           _buildHighlights(context),
-          const SizedBox(height: 32),
+          const SizedBox(height: 40),
           _buildStory(context),
-          const SizedBox(height: 32),
+          const SizedBox(height: 40),
           _buildMission(context),
-          const SizedBox(height: 32),
+          const SizedBox(height: 40),
           _buildValues(context),
-          const SizedBox(height: 32),
+          const SizedBox(height: 40),
           _buildClosingCard(context),
+          const SizedBox(height: 20),
+          _buildFooter(context),
         ],
       ),
     );
   }
 
   Widget _buildHero(BuildContext context) {
-    final isCompact = MediaQuery.sizeOf(context).width < 600;
+    final isCompact = MediaQuery.sizeOf(context).width < 700;
 
     return Container(
-      height: isCompact ? 430 : 390,
+      height: isCompact ? 430 : 440,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
@@ -437,6 +440,63 @@ class AboutUsPage extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildFooter(BuildContext context) {
+    final isCompact = MediaQuery.sizeOf(context).width < 600;
+    final links = Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      children: [
+        _FooterLink(
+          label: 'Home',
+          onPressed: () => Navigator.pushNamed(context, '/home'),
+        ),
+        _FooterLink(
+          label: 'Products',
+          onPressed: () => Navigator.pushNamed(context, '/products'),
+        ),
+        const _FooterLink(label: 'About us'),
+      ],
+    );
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isCompact ? 18 : 24,
+        vertical: 22,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0xff061b32),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: isCompact
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const BuildTechLogo(width: 132, height: 40),
+                const SizedBox(height: 12),
+                const Text(
+                  'Dependable hardware for work that lasts.',
+                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                ),
+                const SizedBox(height: 16),
+                links,
+              ],
+            )
+          : Row(
+              children: [
+                const BuildTechLogo(width: 132, height: 40),
+                const SizedBox(width: 18),
+                const Expanded(
+                  child: Text(
+                    'Dependable hardware for work that lasts.',
+                    style: TextStyle(color: Colors.white70, fontSize: 13),
+                  ),
+                ),
+                links,
+              ],
+            ),
+    );
+  }
 }
 
 class _CompanyValue {
@@ -572,6 +632,26 @@ class _ValueCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _FooterLink extends StatelessWidget {
+  const _FooterLink({required this.label, this.onPressed});
+
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        visualDensity: VisualDensity.compact,
+      ),
+      child: Text(label),
     );
   }
 }
