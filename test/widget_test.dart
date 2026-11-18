@@ -255,7 +255,9 @@ void main() {
     expect(find.textContaining('No order yet'), findsOneWidget);
   });
 
-  testWidgets('settings and profile rows navigate correctly', (tester) async {
+  testWidgets('settings edits profile and keeps account actions available', (
+    tester,
+  ) async {
     await _bootApp(tester);
     await _signIn(tester);
 
@@ -266,13 +268,21 @@ void main() {
 
     await tester.tap(find.text('Edit Profile'));
     await tester.pumpAndSettle();
-    expect(find.text('My Profile'), findsOneWidget);
-    expect(find.text('Krutika Sheth'), findsOneWidget);
-    expect(find.text('shethkrutika8@gmail.com'), findsOneWidget);
-
-    await tester.tap(find.text('Settings').last);
+    expect(find.text('My Profile'), findsNothing);
+    expect(find.text('Full name'), findsOneWidget);
+    expect(find.text('Email address'), findsOneWidget);
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Full name'),
+      'K. Sheth',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Email address'),
+      'krutika@example.com',
+    );
+    await tester.tap(find.text('Save changes'));
     await tester.pumpAndSettle();
-    expect(find.text('Log Out'), findsOneWidget);
+    expect(find.text('K. Sheth'), findsOneWidget);
+    expect(find.text('krutika@example.com'), findsOneWidget);
 
     await tester.tap(find.text('About Us'));
     await tester.pumpAndSettle();
@@ -284,25 +294,23 @@ void main() {
     expect(find.text('Welcome Back'), findsOneWidget);
   });
 
-  testWidgets('profile rows reach wishlist, orders and settings', (
+  testWidgets('settings provides wishlist and order navigation', (
     tester,
   ) async {
     await _bootApp(tester);
     await _signIn(tester);
-    await _openDrawer(tester, 'My Profile');
+    await _openDrawer(tester, 'Settings');
 
     await tester.tap(find.text('Wishlist'));
     await tester.pumpAndSettle();
     expect(find.text('Products'), findsWidgets);
 
-    await _openDrawer(tester, 'My Profile');
+    await _openDrawer(tester, 'Settings');
     await tester.tap(find.text('Orders'));
     await tester.pumpAndSettle();
     expect(find.text('Order Details'), findsOneWidget);
 
-    await _openDrawer(tester, 'My Profile');
-    await tester.tap(find.text('Settings').last);
-    await tester.pumpAndSettle();
+    await _openDrawer(tester, 'Settings');
     expect(find.text('Log Out'), findsOneWidget);
   });
 

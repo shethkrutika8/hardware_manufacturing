@@ -283,9 +283,13 @@ class BuildTechAppBar extends StatelessWidget implements PreferredSizeWidget {
         padding: EdgeInsets.zero,
         visualDensity: VisualDensity.compact,
         constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-        icon: const Icon(Icons.person_outline, color: Colors.black87, size: 18),
-        tooltip: 'Profile',
-        onPressed: () => Navigator.pushNamed(context, '/profile'),
+        icon: const Icon(
+          Icons.settings_outlined,
+          color: Colors.black87,
+          size: 18,
+        ),
+        tooltip: 'Settings',
+        onPressed: () => Navigator.pushNamed(context, '/settings'),
       ),
     ];
 
@@ -430,11 +434,6 @@ class BuildTechDrawer extends StatelessWidget {
         'label': 'Order Details',
         'icon': Icons.receipt_long_outlined,
         'route': '/orders',
-      },
-      {
-        'label': 'My Profile',
-        'icon': Icons.person_outline,
-        'route': '/profile',
       },
       {
         'label': 'Settings',

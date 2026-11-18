@@ -22,7 +22,6 @@ import 'package:hardware_manufacturing/screen/first_page.dart';
 import 'package:hardware_manufacturing/screen/forgot_password_page.dart';
 import 'package:hardware_manufacturing/screen/inventory_page.dart';
 import 'package:hardware_manufacturing/screen/login_page.dart';
-import 'package:hardware_manufacturing/screen/myprofile.dart';
 import 'package:hardware_manufacturing/screen/notification_page.dart';
 import 'package:hardware_manufacturing/screen/notifications_page.dart';
 import 'package:hardware_manufacturing/screen/ordar_page.dart';
@@ -86,7 +85,6 @@ class MyApp extends StatelessWidget {
         '/products': (_) => const ProductsPage(),
         '/wishlist': (_) => const WishlistPage(),
         '/notifications': (_) => const NotificationsPage(),
-        '/profile': (_) => const MyProfilePage(),
         '/settings': (_) => const SettingsPage(),
         '/cart': (_) => const CartPage(),
         '/checkout': (_) => const CheckoutPage(),

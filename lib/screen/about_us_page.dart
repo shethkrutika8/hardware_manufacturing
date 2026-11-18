@@ -60,7 +60,7 @@ class AboutUsPage extends StatelessWidget {
     final isCompact = MediaQuery.sizeOf(context).width < 700;
 
     return Container(
-      height: isCompact ? 430 : 440,
+      height: isCompact ? 450 : 440,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
