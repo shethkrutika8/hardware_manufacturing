@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hardware_manufacturing/screen/common_widgets.dart';
+import 'package:hardware_manufacturing/screen/firebase_service.dart';
 
 class AddProductPage extends StatefulWidget {
   const AddProductPage({super.key});
@@ -15,16 +16,46 @@ class _AddProductPageState extends State<AddProductPage> {
   final TextEditingController priceController = TextEditingController();
   final TextEditingController stockController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
+  bool _isSaving = false;
 
-  void saveProduct() {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Product saved successfully!'),
-          backgroundColor: Colors.green,
-        ),
+  Future<void> saveProduct() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isSaving = true);
+    try {
+      final price = double.tryParse(priceController.text) ?? 0.0;
+      final stock = int.tryParse(stockController.text) ?? 0;
+
+      await FirebaseService.instance.addProduct(
+        name: productNameController.text,
+        category: categoryController.text,
+        numericPrice: price,
+        stock: stock,
+        description: descriptionController.text,
       );
-      Navigator.pop(context);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Product saved to Firebase successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save product: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -161,7 +192,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: saveProduct,
+                      onPressed: _isSaving ? null : saveProduct,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: const Color(0xFF365D7B),
@@ -170,13 +201,19 @@ class _AddProductPageState extends State<AddProductPage> {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      child: const Text(
-                        'Save Product',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      child: _isSaving
+                          ? const SizedBox(
+                              height: 22,
+                              width: 22,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text(
+                              'Save Product',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 20),

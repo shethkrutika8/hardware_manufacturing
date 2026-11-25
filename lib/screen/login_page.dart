@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hardware_manufacturing/screen/common_widgets.dart';
+import 'package:hardware_manufacturing/screen/firebase_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,15 +16,24 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   String _selectedRole = 'Customer'; // 'Customer', 'Admin', 'Delivery'
+  bool _isLoading = false;
 
-  void _login() {
-    if (_formKey.currentState!.validate()) {
-      final email = _emailController.text.trim().toLowerCase();
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) return;
 
-      // Role-based routing as requested:
-      // 1. If explicit role chosen as Admin or email contains admin -> Admin Dashboard
-      // 2. If explicit role chosen as Delivery or email contains delivery -> Delivery Dashboard
-      // 3. Otherwise -> Customer Home
+    final email = _emailController.text.trim().toLowerCase();
+    final password = _passwordController.text;
+
+    setState(() => _isLoading = true);
+    try {
+      await FirebaseService.instance.signInWithEmail(
+        email: email,
+        password: password,
+      );
+
+      if (!mounted) return;
+
+      // Role-based routing:
       if (_selectedRole == 'Admin' || email.contains('admin')) {
         Navigator.pushNamedAndRemoveUntil(
           context,
@@ -41,6 +52,28 @@ class _LoginPageState extends State<LoginPage> {
           '/home',
           (route) => false,
         );
+      }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message ?? 'Login failed. Check your credentials.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -219,14 +252,16 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 18),
 
               // ── Sign In Button ──
-              PrimaryBlueButton(
-                label: _selectedRole == 'Admin'
-                    ? 'Sign In as Admin'
-                    : _selectedRole == 'Delivery'
-                        ? 'Sign In as Delivery Staff'
-                        : 'Sign In',
-                onPressed: _login,
-              ),
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : PrimaryBlueButton(
+                      label: _selectedRole == 'Admin'
+                          ? 'Sign In as Admin'
+                          : _selectedRole == 'Delivery'
+                              ? 'Sign In as Delivery Staff'
+                              : 'Sign In',
+                      onPressed: _login,
+                    ),
 
               const SizedBox(height: 16),
 

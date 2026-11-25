@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hardware_manufacturing/screen/cart_store.dart';
 import 'package:hardware_manufacturing/screen/common_widgets.dart';
 import 'package:hardware_manufacturing/screen/order_store.dart';
+import 'package:hardware_manufacturing/screen/firebase_service.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -51,7 +52,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
     super.dispose();
   }
 
-  void _placeOrder() {
+  bool _isPlacingOrder = false;
+
+  Future<void> _placeOrder() async {
     if (CartStore.items.isEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -60,14 +63,47 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
     if (_editing && !_formKey.currentState!.validate()) return;
 
-    OrderStore.placeFromCart(
-      customerName: _nameController.text.trim(),
-      phone: _phoneController.text.trim(),
-      address: _addressController.text.trim(),
-      paymentLabel: '$_payment (Demo — no payment processed)',
-    );
-    CartStore.clear();
-    Navigator.pushReplacementNamed(context, '/order-placed');
+    setState(() => _isPlacingOrder = true);
+    try {
+      // 1. Save to Firebase Firestore
+      await FirebaseService.instance.placeOrder(
+        customerName: _nameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        address: _addressController.text.trim(),
+        paymentLabel: '$_payment (Demo — no payment processed)',
+        items: List.from(CartStore.items),
+        subtotal: CartStore.subtotal,
+        tax: CartStore.tax,
+        shipping: CartStore.shipping,
+        total: CartStore.total,
+      );
+
+      // 2. Keep local sync for the immediate confirmation view
+      OrderStore.placeFromCart(
+        customerName: _nameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        address: _addressController.text.trim(),
+        paymentLabel: '$_payment (Demo — no payment processed)',
+      );
+
+      CartStore.clear();
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/order-placed');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to place order in Firebase: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isPlacingOrder = false);
+      }
+    }
   }
 
   @override
@@ -101,10 +137,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
             width: double.infinity,
             color: kGradBottom,
             padding: const EdgeInsets.symmetric(vertical: 22),
-            child: WhitePillButton(
-              label: 'Place Order',
-              onPressed: _placeOrder,
-            ),
+            child: _isPlacingOrder
+                ? const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  )
+                : WhitePillButton(
+                    label: 'Place Order',
+                    onPressed: _placeOrder,
+                  ),
           ),
         ],
       ),

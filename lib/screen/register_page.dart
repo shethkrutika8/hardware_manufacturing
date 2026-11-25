@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hardware_manufacturing/screen/common_widgets.dart';
+import 'package:hardware_manufacturing/screen/firebase_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -15,10 +17,51 @@ class _RegisterPageState extends State<RegisterPage> {
   final _mobileController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
+  bool _isLoading = false;
 
-  void _register() {
-    if (_formKey.currentState!.validate()) {
-      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+  Future<void> _register() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+    try {
+      await FirebaseService.instance.registerWithEmail(
+        name: _nameController.text,
+        email: _emailController.text,
+        password: _passwordController.text,
+        mobile: _mobileController.text,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account created successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message ?? 'Registration failed. Try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An error occurred: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -103,7 +146,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 },
               ),
               const SizedBox(height: 18),
-              PrimaryBlueButton(label: 'Create Account', onPressed: _register),
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : PrimaryBlueButton(label: 'Create Account', onPressed: _register),
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

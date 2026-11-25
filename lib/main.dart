@@ -37,10 +37,11 @@ import 'package:hardware_manufacturing/screen/role_login_page.dart';
 import 'package:hardware_manufacturing/screen/role_selection_page.dart';
 import 'package:hardware_manufacturing/screen/setting.dart';
 import 'package:hardware_manufacturing/screen/wishlist_page.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-
-
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -131,7 +132,6 @@ class MyApp extends StatelessWidget {
 
         // ── Categories (shared) ──
         '/categories': (_) => const CategoriesPage(),
-        Firebase.initializeApp()
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/product-detail') {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hardware_manufacturing/screen/common_widgets.dart';
+import 'package:hardware_manufacturing/screen/firebase_service.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -19,20 +20,28 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     super.dispose();
   }
 
-  void _sendOtp({required bool resend}) {
+  Future<void> _sendOtp({required bool resend}) async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() {
-      _demoOtp = '4821';
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          resend
-              ? 'Demo OTP resent: $_demoOtp (no email is actually sent).'
-              : 'Demo OTP: $_demoOtp. Use this to reset. No email is actually sent.',
-        ),
-      ),
-    );
+    try {
+      await FirebaseService.instance.sendPasswordReset(_emailController.text);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Password reset link sent to your email! Please check your inbox.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to send reset email: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
