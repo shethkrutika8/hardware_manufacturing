@@ -38,6 +38,8 @@ import 'package:hardware_manufacturing/screen/role_selection_page.dart';
 import 'package:hardware_manufacturing/screen/setting.dart';
 import 'package:hardware_manufacturing/screen/wishlist_page.dart';
 
+
+
 void main() {
   runApp(const MyApp());
 }
@@ -129,6 +131,7 @@ class MyApp extends StatelessWidget {
 
         // ── Categories (shared) ──
         '/categories': (_) => const CategoriesPage(),
+        Firebase.initializeApp()
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/product-detail') {
