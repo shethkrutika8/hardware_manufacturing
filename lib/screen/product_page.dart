@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hardware_manufacturing/screen/common_widgets.dart';
-import 'package:hardware_manufacturing/screen/product_model.dart';
-import 'package:hardware_manufacturing/screen/firebase_service.dart';
 
 /// Manage Products — reachable via /admin/products
 class ManageProductPage extends StatelessWidget {
@@ -142,65 +140,43 @@ class ManageProductPage extends StatelessWidget {
 
               // ── Product list ──
               Expanded(
-                child: StreamBuilder<List<Product>>(
-                  stream: FirebaseService.instance.streamProducts(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator(color: Colors.white));
-                    }
-
-                    List<ManageProductItem> displayList = [];
-                    if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                      displayList = snapshot.data!.map((prod) {
-                        return ManageProductItem(
-                          name: prod.name,
-                          price: prod.price,
-                          quantity: prod.stock,
-                        );
-                      }).toList();
-                    } else {
-                      displayList = products;
-                    }
-
-                    return ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      itemCount: displayList.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: 10),
-                      itemBuilder: (context, index) {
-                        final p = displayList[index];
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  itemCount: products.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 10),
+                  itemBuilder: (context, index) {
+                    final p = products[index];
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Text(p.name,
+                                style: const TextStyle(fontSize: 12)),
                           ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                flex: 3,
-                                child: Text(p.name,
-                                    style: const TextStyle(fontSize: 12)),
-                              ),
-                              Expanded(
-                                flex: 3,
-                                child: Text(p.price,
-                                    style: const TextStyle(
-                                        fontSize: 11, color: Colors.grey)),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: Text(p.quantity,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600)),
-                              ),
-                            ],
+                          Expanded(
+                            flex: 3,
+                            child: Text(p.price,
+                                style: const TextStyle(
+                                    fontSize: 11, color: Colors.grey)),
                           ),
-                        );
-                      },
+                          Expanded(
+                            flex: 2,
+                            child: Text(p.quantity,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600)),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),

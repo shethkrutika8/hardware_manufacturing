@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hardware_manufacturing/screen/common_widgets.dart';
-import 'package:hardware_manufacturing/screen/firebase_service.dart';
 
 /// Admin Profile page — reachable via /admin/profile
 class AdminProfilePageScreen extends StatelessWidget {
@@ -205,13 +204,10 @@ class AdminProfilePageScreen extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () async {
+            onPressed: () {
               Navigator.of(dialogCtx).pop();
-              await FirebaseService.instance.signOut();
-              if (context.mounted) {
-                Navigator.of(context)
-                    .pushNamedAndRemoveUntil('/login', (r) => false);
-              }
+              Navigator.of(context)
+                  .pushNamedAndRemoveUntil('/login', (r) => false);
             },
             child: const Text('Log Out',
                 style: TextStyle(color: Colors.red)),

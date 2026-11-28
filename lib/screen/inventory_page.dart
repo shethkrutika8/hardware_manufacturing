@@ -13,7 +13,7 @@ class InventoryPage extends StatefulWidget {
 class _InventoryPageState extends State<InventoryPage> {
   String selectedFilter = 'All';
 
-  final List<Order> orders = const [
+  final List<Order> defaultFallbackOrders = const [
     Order(id: 'BTD1234567890', status: 'Processing'),
     Order(id: 'BTD6278364752', status: 'Processing'),
     Order(id: 'BTD6278365778', status: 'Shipped'),
@@ -30,10 +30,7 @@ class _InventoryPageState extends State<InventoryPage> {
   ];
 
   List<Order> get filteredOrders {
-    if (selectedFilter == 'All') {
-      return orders;
-    }
-    return orders.where((order) => order.status == selectedFilter).toList();
+    return defaultFallbackOrders;
   }
 
   @override
@@ -92,26 +89,32 @@ class _InventoryPageState extends State<InventoryPage> {
                   stream: FirebaseService.instance.streamAllOrders(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator(color: Colors.white));
+                      return const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      );
                     }
-                    List<Order> displayOrders = [];
+
+                    List<Order> displayList = [];
+
                     if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-                      displayOrders = snapshot.data!.docs.map((doc) {
+                      for (final doc in snapshot.data!.docs) {
                         final data = doc.data();
-                        return Order(
-                          id: data['orderId'] ?? doc.id,
-                          status: data['status'] ?? 'Processing',
-                        );
-                      }).toList();
+                        final id = data['orderId'] ?? doc.id;
+                        final status = data['status'] ?? 'Processing';
+                        displayList.add(Order(id: id, status: status));
+                      }
                     } else {
-                      displayOrders = orders;
+                      displayList = List.from(defaultFallbackOrders);
                     }
 
-                    final filtered = selectedFilter == 'All'
-                        ? displayOrders
-                        : displayOrders.where((o) => o.status.toLowerCase() == selectedFilter.toLowerCase()).toList();
+                    if (selectedFilter != 'All') {
+                      displayList = displayList
+                          .where((o) =>
+                              o.status.toLowerCase() == selectedFilter.toLowerCase())
+                          .toList();
+                    }
 
-                    if (filtered.isEmpty) {
+                    if (displayList.isEmpty) {
                       return const Center(
                         child: Text(
                           'No orders in this status',
@@ -121,11 +124,13 @@ class _InventoryPageState extends State<InventoryPage> {
                     }
 
                     return ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                      itemCount: filtered.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 6),
+                      itemCount: displayList.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 12),
                       itemBuilder: (context, index) {
-                        final order = filtered[index];
+                        final order = displayList[index];
                         return _orderCard(order.id, order.status);
                       },
                     );

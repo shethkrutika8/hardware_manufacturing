@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hardware_manufacturing/screen/common_widgets.dart';
-import 'package:hardware_manufacturing/screen/firebase_service.dart';
 
 class AssignOrdersPage extends StatefulWidget {
   const AssignOrdersPage({super.key});
@@ -103,54 +101,24 @@ class _AssignOrdersPageState extends State<AssignOrdersPage> {
               const SizedBox(height: 16),
               // Orders list
               Expanded(
-                child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: FirebaseService.instance.streamAllOrders(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator(color: Colors.white));
-                    }
-
-                    List<_OrderItem> displayOrders = [];
-                    if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-                      displayOrders = snapshot.data!.docs.map((doc) {
-                        final data = doc.data();
-                        return _OrderItem(
-                          id: data['orderId'] ?? doc.id,
-                          status: data['status'] ?? 'Pending',
-                        );
-                      }).toList();
-                    } else {
-                      displayOrders = orders;
-                    }
-
-                    final filtered = selectedFilter == 'All'
-                        ? displayOrders
-                        : selectedFilter == 'In Progress'
-                            ? displayOrders.where((o) => o.status.toLowerCase().contains('progress') || o.status.toLowerCase().contains('pick')).toList()
-                            : displayOrders.where((o) => o.status.toLowerCase().contains('upcoming') || o.status.toLowerCase().contains('pending')).toList();
-
-                    if (filtered.isEmpty) {
-                      return const Center(
+                child: filteredOrders.isEmpty
+                    ? const Center(
                         child: Text(
                           'No orders found.',
                           style: TextStyle(color: Colors.white70, fontSize: 15),
                         ),
-                      );
-                    }
-
-                    return ListView.separated(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 4),
-                      itemCount: filtered.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final order = filtered[index];
-                        return _buildOrderCard(context, order);
-                      },
-                    );
-                  },
-                ),
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 4),
+                        itemCount: filteredOrders.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final order = filteredOrders[index];
+                          return _buildOrderCard(context, order);
+                        },
+                      ),
               ),
             ],
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:hardware_manufacturing/screen/product_model.dart';
+import 'package:hardware_manufacturing/screen/firebase_service.dart';
 
 /// Shared wishlist state across the app.
 /// Stores product IDs that have been wishlisted.
@@ -23,16 +24,29 @@ class WishlistStore {
       _ids.add(productId);
     }
     _notify();
+
+    // Persist to Firebase in background if logged in
+    try {
+      FirebaseService.instance.toggleWishlist(productId);
+    } catch (_) {}
   }
 
   static void add(String productId) {
     _ids.add(productId);
     _notify();
+
+    try {
+      FirebaseService.instance.toggleWishlist(productId);
+    } catch (_) {}
   }
 
   static void remove(String productId) {
     _ids.remove(productId);
     _notify();
+
+    try {
+      FirebaseService.instance.toggleWishlist(productId);
+    } catch (_) {}
   }
 
   static Set<String> get ids => Set.unmodifiable(_ids);

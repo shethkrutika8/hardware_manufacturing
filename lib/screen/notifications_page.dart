@@ -15,10 +15,9 @@ class NotificationsPage extends StatelessWidget {
           const PageHeading('Notifications'),
           Expanded(
             child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream: FirebaseService.instance.currentUser != null
-                  ? FirebaseService.instance.streamUserNotifications(FirebaseService.instance.currentUser!.uid)
-                  : const Stream.empty(),
+              stream: FirebaseService.instance.streamNotifications(),
               builder: (context, snapshot) {
+                // If firestore has items, display them; otherwise fallback to local in-memory store
                 if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
                   final docs = snapshot.data!.docs;
                   return ListView.builder(
@@ -27,9 +26,9 @@ class NotificationsPage extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final doc = docs[index];
                       final data = doc.data();
-                      final isRead = data['isRead'] ?? false;
                       final title = data['title'] ?? 'Notification';
                       final message = data['message'] ?? '';
+                      final isRead = data['isRead'] ?? false;
 
                       return Container(
                         margin: const EdgeInsets.only(bottom: 10),
@@ -81,7 +80,8 @@ class NotificationsPage extends StatelessWidget {
                             ),
                             IconButton(
                               visualDensity: VisualDensity.compact,
-                              onPressed: () => FirebaseService.instance.markNotificationAsRead(doc.id),
+                              onPressed: () => FirebaseService.instance
+                                  .markNotificationRead(doc.id, !isRead),
                               icon: Icon(
                                 isRead
                                     ? Icons.mark_email_read_outlined

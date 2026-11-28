@@ -33,18 +33,18 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    _loadUserProfile();
+    _loadFirebaseUserProfile();
   }
 
-  Future<void> _loadUserProfile() async {
-    final user = FirebaseService.instance.currentUser;
-    if (user != null) {
-      final profile = await FirebaseService.instance.getUserProfile(user.uid);
-      if (profile != null && mounted) {
+  Future<void> _loadFirebaseUserProfile() async {
+    final uid = FirebaseService.instance.currentUid;
+    if (uid != null) {
+      final data = await FirebaseService.instance.getUserProfile(uid);
+      if (data != null && mounted) {
         setState(() {
-          _name = profile['name'] ?? user.displayName ?? _name;
-          _email = profile['email'] ?? user.email ?? _email;
-          _phone = profile['mobile'] ?? _phone;
+          _name = data['name'] ?? _name;
+          _email = data['email'] ?? _email;
+          _phone = data['mobile'] ?? _phone;
           _nameController.text = _name;
           _emailController.text = _email;
           _phoneController.text = _phone;
@@ -53,24 +53,28 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  Future<void> _saveProfile() async {
+  void _saveProfile() async {
     if (!_profileFormKey.currentState!.validate()) return;
 
-    final user = FirebaseService.instance.currentUser;
-    if (user != null) {
+    final newName = _nameController.text.trim();
+    final newPhone = _phoneController.text.trim();
+
+    setState(() {
+      _name = newName;
+      _email = _emailController.text.trim();
+      _phone = newPhone;
+      _isEditingProfile = false;
+    });
+
+    final uid = FirebaseService.instance.currentUid;
+    if (uid != null) {
       await FirebaseService.instance.updateUserProfile(
-        uid: user.uid,
-        name: _nameController.text.trim(),
-        mobile: _phoneController.text.trim(),
+        uid: uid,
+        name: newName,
+        mobile: newPhone,
       );
     }
 
-    setState(() {
-      _name = _nameController.text.trim();
-      _email = _emailController.text.trim();
-      _phone = _phoneController.text.trim();
-      _isEditingProfile = false;
-    });
     if (mounted) {
       ScaffoldMessenger.of(
         context,
@@ -340,15 +344,12 @@ class _SettingsPageState extends State<SettingsPage> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            onTap: () async {
-              await FirebaseService.instance.signOut();
-              if (context.mounted) {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/login',
-                  (route) => false,
-                );
-              }
+            onTap: () {
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/login',
+                (route) => false,
+              );
             },
           ),
         ],
