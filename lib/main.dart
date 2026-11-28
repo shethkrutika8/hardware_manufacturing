@@ -37,7 +37,7 @@ import 'package:hardware_manufacturing/screen/role_login_page.dart';
 import 'package:hardware_manufacturing/screen/role_selection_page.dart';
 import 'package:hardware_manufacturing/screen/setting.dart';
 import 'package:hardware_manufacturing/screen/wishlist_page.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core/firebase_core.dart' hide FirebaseService;
 import 'package:hardware_manufacturing/firebase_options.dart';
 import 'package:hardware_manufacturing/screen/firebase_service.dart';
 

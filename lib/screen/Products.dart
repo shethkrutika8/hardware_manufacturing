@@ -49,24 +49,6 @@ class _ProductsPageState extends State<ProductsPage> {
     }
   }
 
-  List<Product> get _filtered {
-    final list = kSampleProducts.where((p) {
-      return selectedCategory == 'All Categories' || p.category == selectedCategory;
-    }).toList();
-    switch (sortMode) {
-      case 'Price: Low to High':
-        list.sort((a, b) => a.numericPrice.compareTo(b.numericPrice));
-        break;
-      case 'Price: High to Low':
-        list.sort((a, b) => b.numericPrice.compareTo(a.numericPrice));
-        break;
-      case 'Name A-Z':
-        list.sort((a, b) => a.name.compareTo(b.name));
-        break;
-    }
-    return list;
-  }
-
   void _openFilterDialog() {
     showDialog(
       context: context,
@@ -101,7 +83,6 @@ class _ProductsPageState extends State<ProductsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final filtered = _filtered;
     return BluePageScaffold(
       body: Column(
         children: [
