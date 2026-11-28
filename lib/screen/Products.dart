@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hardware_manufacturing/screen/cart_store.dart';
 import 'package:hardware_manufacturing/screen/common_widgets.dart';
 import 'package:hardware_manufacturing/screen/product_model.dart';
+import 'package:hardware_manufacturing/screen/firebase_service.dart';
 
 class ProductsPage extends StatefulWidget {
   const ProductsPage({super.key});
@@ -48,8 +49,8 @@ class _ProductsPageState extends State<ProductsPage> {
     }
   }
 
-  List<Product> get _filtered {
-    final list = kSampleProducts.where((p) {
+  List<Product> _processList(List<Product> source) {
+    final list = source.where((p) {
       return selectedCategory == 'All Categories' || p.category == selectedCategory;
     }).toList();
     switch (sortMode) {
@@ -175,20 +176,33 @@ class _ProductsPageState extends State<ProductsPage> {
             ),
           ),
           Expanded(
-            child: filtered.isEmpty
-                ? const Center(
+            child: StreamBuilder<List<Product>>(
+              stream: FirebaseService.instance.streamProducts(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator(color: Colors.white));
+                }
+                final allProducts = snapshot.data ?? kSampleProducts;
+                final filtered = _processList(allProducts);
+
+                if (filtered.isEmpty) {
+                  return const Center(
                     child: Text(
                       'No matching products found',
                       style: TextStyle(color: Colors.white, fontSize: 14),
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(14, 4, 14, 18),
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      return _productItemCard(filtered[index]);
-                    },
-                  ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(14, 4, 14, 18),
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) {
+                    return _productItemCard(filtered[index]);
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),

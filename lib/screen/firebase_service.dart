@@ -14,9 +14,11 @@ class FirebaseService {
   FirebaseFirestore get firestore => _firestore;
   User? get currentUser => _auth.currentUser;
 
-  // ── Authentication ──
+  // =========================================================================
+  // 1. AUTHENTICATION & USER MANAGEMENT
+  // =========================================================================
 
-  /// Register a new user with email, password and profile data
+  /// Register a new user with email, password, and profile record
   Future<UserCredential> registerWithEmail({
     required String name,
     required String email,
@@ -31,14 +33,16 @@ class FirebaseService {
 
     await cred.user?.updateDisplayName(name.trim());
 
-    // Save profile in Firestore
+    // Save profile in Firestore users collection
     await _firestore.collection('users').doc(cred.user!.uid).set({
       'uid': cred.user!.uid,
       'name': name.trim(),
       'email': email.trim().toLowerCase(),
       'mobile': mobile.trim(),
       'role': role,
+      'address': '',
       'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
     });
 
     return cred;
@@ -55,15 +59,40 @@ class FirebaseService {
     );
   }
 
-  /// Send password reset link to user email
+  /// Send password reset email
   Future<void> sendPasswordReset(String email) async {
     await _auth.sendPasswordResetEmail(email: email.trim());
   }
 
-  /// Fetch user profile role and information
+  /// Fetch user profile
   Future<Map<String, dynamic>?> getUserProfile(String uid) async {
     final doc = await _firestore.collection('users').doc(uid).get();
     return doc.data();
+  }
+
+  /// Update user profile
+  Future<void> updateUserProfile({
+    required String uid,
+    String? name,
+    String? mobile,
+    String? address,
+  }) async {
+    final Map<String, dynamic> data = {
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+    if (name != null) data['name'] = name.trim();
+    if (mobile != null) data['mobile'] = mobile.trim();
+    if (address != null) data['address'] = address.trim();
+
+    await _firestore.collection('users').doc(uid).update(data);
+  }
+
+  /// Stream list of all customers (for Admin)
+  Stream<QuerySnapshot<Map<String, dynamic>>> streamCustomers() {
+    return _firestore
+        .collection('users')
+        .where('role', isEqualTo: 'Customer')
+        .snapshots();
   }
 
   /// Sign out current user
@@ -71,7 +100,9 @@ class FirebaseService {
     await _auth.signOut();
   }
 
-  // ── Products ──
+  // =========================================================================
+  // 2. PRODUCTS CATALOG
+  // =========================================================================
 
   /// Stream of products from Firestore (falls back to sample if collection is empty)
   Stream<List<Product>> streamProducts() {
@@ -117,7 +148,7 @@ class FirebaseService {
       'name': name.trim(),
       'category': category.trim(),
       'numericPrice': numericPrice,
-      'price': 'Rs. ${numericPrice.toStringAsFixed(2)}',
+      'price': 'Rs. ${numericPrice.toStringAsFixed(2)}/pcs',
       'stock': '$stock pcs',
       'stockCount': stock,
       'description': description.trim(),
@@ -132,10 +163,24 @@ class FirebaseService {
       'grade': '8.8 Industrial',
       'application': 'Structural & Manufacturing',
       'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
     });
   }
 
-  // ── Orders ──
+  /// Update existing product
+  Future<void> updateProduct(String productId, Map<String, dynamic> data) async {
+    data['updatedAt'] = FieldValue.serverTimestamp();
+    await _firestore.collection('products').doc(productId).update(data);
+  }
+
+  /// Delete a product
+  Future<void> deleteProduct(String productId) async {
+    await _firestore.collection('products').doc(productId).delete();
+  }
+
+  // =========================================================================
+  // 3. ORDERS
+  // =========================================================================
 
   /// Place an order and save in Firestore
   Future<String> placeOrder({
@@ -160,12 +205,14 @@ class FirebaseService {
       'phone': phone,
       'address': address,
       'paymentMethod': paymentLabel,
-      'status': 'Pending',
+      'status': 'Processing',
+      'assignedStaff': '',
       'subtotal': subtotal,
       'tax': tax,
       'shipping': shipping,
       'total': total,
       'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
       'items': items
           .map((i) => {
                 'productId': i.product.id,
@@ -178,10 +225,20 @@ class FirebaseService {
     };
 
     await _firestore.collection('orders').doc(orderId).set(orderData);
+
+    // Also send an automated notification to the user in Firestore
+    if (currentUser?.uid != null) {
+      await addNotification(
+        userId: currentUser!.uid,
+        title: 'Order Confirmed',
+        message: 'Your order $orderId has been placed and is being processed.',
+      );
+    }
+
     return orderId;
   }
 
-  /// Stream of all orders for Admin / Delivery
+  /// Stream of all orders (for Admin & Delivery)
   Stream<QuerySnapshot<Map<String, dynamic>>> streamAllOrders() {
     return _firestore
         .collection('orders')
@@ -200,5 +257,96 @@ class FirebaseService {
         .where('userId', isEqualTo: uid)
         .orderBy('createdAt', descending: true)
         .snapshots();
+  }
+
+  /// Update order status (e.g. Processing -> Pick Up -> Out for Delivery -> Delivered)
+  Future<void> updateOrderStatus({
+    required String orderId,
+    required String status,
+    String? assignedStaff,
+  }) async {
+    final Map<String, dynamic> updateData = {
+      'status': status,
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+    if (assignedStaff != null) {
+      updateData['assignedStaff'] = assignedStaff;
+    }
+    await _firestore.collection('orders').doc(orderId).update(updateData);
+  }
+
+  // =========================================================================
+  // 4. NOTIFICATIONS
+  // =========================================================================
+
+  /// Stream user notifications
+  Stream<QuerySnapshot<Map<String, dynamic>>> streamUserNotifications(String userId) {
+    return _firestore
+        .collection('notifications')
+        .where('userId', isEqualTo: userId)
+        .orderBy('createdAt', descending: true)
+        .snapshots();
+  }
+
+  /// Add a notification
+  Future<void> addNotification({
+    required String userId,
+    required String title,
+    required String message,
+  }) async {
+    await _firestore.collection('notifications').add({
+      'userId': userId,
+      'title': title,
+      'message': message,
+      'isRead': false,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  /// Mark notification as read
+  Future<void> markNotificationAsRead(String notificationId) async {
+    await _firestore
+        .collection('notifications')
+        .doc(notificationId)
+        .update({'isRead': true});
+  }
+
+  // =========================================================================
+  // 5. WISHLIST
+  // =========================================================================
+
+  /// Stream user wishlist product IDs
+  Stream<QuerySnapshot<Map<String, dynamic>>> streamWishlist(String userId) {
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('wishlist')
+        .snapshots();
+  }
+
+  /// Add item to user wishlist
+  Future<void> addToWishlist(String userId, Product product) async {
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('wishlist')
+        .doc(product.id)
+        .set({
+      'productId': product.id,
+      'name': product.name,
+      'price': product.price,
+      'image': product.image,
+      'addedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  /// Remove item from user wishlist
+  Future<void> removeFromWishlist(String userId, String productId) async {
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('wishlist')
+        .doc(productId)
+        .delete();
   }
 }

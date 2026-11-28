@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hardware_manufacturing/screen/common_widgets.dart';
+import 'package:hardware_manufacturing/screen/firebase_service.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -29,8 +30,40 @@ class _SettingsPageState extends State<SettingsPage> {
     super.dispose();
   }
 
-  void _saveProfile() {
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    final user = FirebaseService.instance.currentUser;
+    if (user != null) {
+      final profile = await FirebaseService.instance.getUserProfile(user.uid);
+      if (profile != null && mounted) {
+        setState(() {
+          _name = profile['name'] ?? user.displayName ?? _name;
+          _email = profile['email'] ?? user.email ?? _email;
+          _phone = profile['mobile'] ?? _phone;
+          _nameController.text = _name;
+          _emailController.text = _email;
+          _phoneController.text = _phone;
+        });
+      }
+    }
+  }
+
+  Future<void> _saveProfile() async {
     if (!_profileFormKey.currentState!.validate()) return;
+
+    final user = FirebaseService.instance.currentUser;
+    if (user != null) {
+      await FirebaseService.instance.updateUserProfile(
+        uid: user.uid,
+        name: _nameController.text.trim(),
+        mobile: _phoneController.text.trim(),
+      );
+    }
 
     setState(() {
       _name = _nameController.text.trim();
@@ -38,9 +71,11 @@ class _SettingsPageState extends State<SettingsPage> {
       _phone = _phoneController.text.trim();
       _isEditingProfile = false;
     });
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Profile updated')));
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Profile updated in Firebase')));
+    }
   }
 
   void _cancelProfileEdit() {
@@ -305,12 +340,15 @@ class _SettingsPageState extends State<SettingsPage> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            onTap: () {
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/login',
-                (route) => false,
-              );
+            onTap: () async {
+              await FirebaseService.instance.signOut();
+              if (context.mounted) {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/login',
+                  (route) => false,
+                );
+              }
             },
           ),
         ],
