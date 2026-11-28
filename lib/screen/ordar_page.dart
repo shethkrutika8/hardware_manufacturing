@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hardware_manufacturing/screen/common_widgets.dart';
+import 'package:hardware_manufacturing/screen/firebase_service.dart';
 
 class CustomerPage extends StatelessWidget {
   const CustomerPage({super.key});
 
-  final List<Customer> customers = const [
+  final List<Customer> fallbackCustomers = const [
     Customer(
       initials: 'KS',
       name: 'Krutika Sheth',
@@ -62,12 +64,44 @@ class CustomerPage extends StatelessWidget {
           ),
         ),
         child: SafeArea(
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            itemCount: customers.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 14),
-            itemBuilder: (context, index) {
-              return _customerCard(context, customers[index]);
+          child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: FirebaseService.instance.streamAllUsers(),
+            builder: (context, snapshot) {
+              List<Customer> customerList = [];
+
+              if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+                for (final doc in snapshot.data!.docs) {
+                  final data = doc.data();
+                  final name = data['name'] ?? 'User';
+                  final email = data['email'] ?? '';
+                  final phone = data['mobile'] ?? data['phone'] ?? '';
+                  final initials = name.isNotEmpty
+                      ? name.split(' ').map((s) => s.isNotEmpty ? s[0] : '').take(2).join().toUpperCase()
+                      : 'U';
+                  customerList.add(
+                    Customer(
+                      initials: initials,
+                      name: name,
+                      email: email,
+                      ordersCount: 1,
+                      phone: phone,
+                    ),
+                  );
+                }
+              }
+
+              if (customerList.isEmpty) {
+                customerList = fallbackCustomers;
+              }
+
+              return ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                itemCount: customerList.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 14),
+                itemBuilder: (context, index) {
+                  return _customerCard(context, customerList[index]);
+                },
+              );
             },
           ),
         ),

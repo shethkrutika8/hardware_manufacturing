@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hardware_manufacturing/screen/cart_store.dart';
 import 'package:hardware_manufacturing/screen/common_widgets.dart';
 import 'package:hardware_manufacturing/screen/product_model.dart';
+import 'package:hardware_manufacturing/screen/firebase_service.dart';
 
 class ProductsPage extends StatefulWidget {
   const ProductsPage({super.key});
@@ -175,20 +176,48 @@ class _ProductsPageState extends State<ProductsPage> {
             ),
           ),
           Expanded(
-            child: filtered.isEmpty
-                ? const Center(
+            child: StreamBuilder<List<Product>>(
+              stream: FirebaseService.instance.streamProducts(),
+              builder: (context, snapshot) {
+                final sourceList = (snapshot.hasData && snapshot.data!.isNotEmpty)
+                    ? snapshot.data!
+                    : kSampleProducts;
+
+                final list = sourceList.where((p) {
+                  return selectedCategory == 'All Categories' ||
+                      p.category.toLowerCase() == selectedCategory.toLowerCase();
+                }).toList();
+
+                switch (sortMode) {
+                  case 'Price: Low to High':
+                    list.sort((a, b) => a.numericPrice.compareTo(b.numericPrice));
+                    break;
+                  case 'Price: High to Low':
+                    list.sort((a, b) => b.numericPrice.compareTo(a.numericPrice));
+                    break;
+                  case 'Name A-Z':
+                    list.sort((a, b) => a.name.compareTo(b.name));
+                    break;
+                }
+
+                if (list.isEmpty) {
+                  return const Center(
                     child: Text(
                       'No matching products found',
                       style: TextStyle(color: Colors.white, fontSize: 14),
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(14, 4, 14, 18),
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      return _productItemCard(filtered[index]);
-                    },
-                  ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(14, 4, 14, 18),
+                  itemCount: list.length,
+                  itemBuilder: (context, index) {
+                    return _productItemCard(list[index]);
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),
