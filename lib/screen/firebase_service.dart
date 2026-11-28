@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hardware_manufacturing/screen/product_model.dart';
 import 'package:hardware_manufacturing/screen/cart_store.dart';
 
@@ -34,13 +35,16 @@ class FirebaseService {
 
     await cred.user?.updateDisplayName(name.trim());
 
-    // Save profile in Firestore
+    // Save profile in Firestore users collection
     await _firestore.collection('users').doc(cred.user!.uid).set({
       'uid': cred.user!.uid,
       'name': name.trim(),
       'email': email.trim().toLowerCase(),
+      'phone': mobile.trim(),
       'mobile': mobile.trim(),
       'role': role,
+      'profileImage': '',
+      'isActive': true,
       'address': '',
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
@@ -86,15 +90,33 @@ class FirebaseService {
     String? name,
     String? mobile,
     String? address,
+    String? profileImage,
   }) async {
     final Map<String, dynamic> data = {
       'updatedAt': FieldValue.serverTimestamp(),
     };
     if (name != null) data['name'] = name.trim();
-    if (mobile != null) data['mobile'] = mobile.trim();
+    if (mobile != null) {
+      data['mobile'] = mobile.trim();
+      data['phone'] = mobile.trim();
+    }
     if (address != null) data['address'] = address.trim();
+    if (profileImage != null) data['profileImage'] = profileImage;
 
     await _firestore.collection('users').doc(uid).update(data);
+  }
+
+  /// Stream all registered users (For Admin User Management)
+  Stream<QuerySnapshot<Map<String, dynamic>>> streamAllUsers() {
+    return _firestore.collection('users').snapshots();
+  }
+
+  /// Activate or deactivate user account
+  Future<void> toggleUserActiveStatus(String uid, bool isActive) async {
+    await _firestore.collection('users').doc(uid).update({
+      'isActive': isActive,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
   }
 
   /// Sign out current user
@@ -106,7 +128,7 @@ class FirebaseService {
   // 2. PRODUCTS (CRUD)
   // =========================================================================
 
-  /// Stream of products from Firestore (falls back to sample if collection is empty)
+  /// Stream of products from Firestore
   Stream<List<Product>> streamProducts() {
     return _firestore
         .collection('products')
@@ -119,14 +141,15 @@ class FirebaseService {
         final data = doc.data();
         return Product(
           id: doc.id,
-          name: data['name'] ?? '',
+          name: data['productName'] ?? data['name'] ?? '',
           price: data['price'] ?? 'Rs. 0.00',
-          numericPrice: (data['numericPrice'] as num?)?.toDouble() ?? 0.0,
-          image: data['image'] ?? 'assets/images/HEX_NUT.PNG',
+          numericPrice: (data['numericPrice'] as num?)?.toDouble() ??
+              (data['price'] is num ? (data['price'] as num).toDouble() : 0.0),
+          image: data['imageUrl'] ?? data['image'] ?? 'assets/images/HEX_NUT.PNG',
           shortInfo: data['shortInfo'] ?? '',
           description: data['description'] ?? '',
           specifications: data['specifications'] ?? '',
-          category: data['category'] ?? 'General',
+          category: data['category'] ?? data['categoryId'] ?? 'General',
           stock: data['stock']?.toString() ?? 'In Stock',
           material: data['material'] ?? 'High Grade Steel',
           size: data['size'] ?? 'Standard',
@@ -150,25 +173,27 @@ class FirebaseService {
     String? image,
     String material = 'High Grade Steel',
     String size = 'Standard',
+    String brand = 'BuildTech',
   }) async {
     return await _firestore.collection('products').add({
+      'productId': '',
+      'productName': name.trim(),
       'name': name.trim(),
+      'categoryId': category.trim(),
       'category': category.trim(),
       'numericPrice': numericPrice,
       'price': 'Rs. ${numericPrice.toStringAsFixed(2)}',
       'stock': '$stock pcs',
       'stockCount': stock,
+      'brand': brand,
       'description': description.trim(),
+      'imageUrl': image ?? 'assets/images/HEX_NUT.PNG',
       'image': image ?? 'assets/images/HEX_NUT.PNG',
       'shortInfo': description.trim().split('\n').first,
       'specifications': 'Category: $category\nStock: $stock pcs',
       'material': material,
       'size': size,
-      'threadType': 'Standard Metric',
-      'headType': 'Standard',
-      'finish': 'Zinc Plated',
-      'grade': '8.8 Industrial',
-      'application': 'Structural & Manufacturing',
+      'isAvailable': stock > 0,
       'isActive': true,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
@@ -187,7 +212,120 @@ class FirebaseService {
   }
 
   // =========================================================================
-  // 3. ORDERS (CRUD)
+  // 3. CATEGORIES
+  // =========================================================================
+
+  /// Stream categories from Firestore
+  Stream<QuerySnapshot<Map<String, dynamic>>> streamCategories() {
+    return _firestore.collection('categories').snapshots();
+  }
+
+  /// Add Category
+  Future<void> addCategory({
+    required String categoryName,
+    required String description,
+    String? imageUrl,
+  }) async {
+    await _firestore.collection('categories').add({
+      'categoryName': categoryName.trim(),
+      'description': description.trim(),
+      'imageUrl': imageUrl ?? '',
+      'isActive': true,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  /// Delete Category
+  Future<void> deleteCategory(String categoryId) async {
+    await _firestore.collection('categories').doc(categoryId).delete();
+  }
+
+  // =========================================================================
+  // 4. CARTS (Document ID: User UID)
+  // =========================================================================
+
+  /// Save Cart to Firestore
+  Future<void> syncCartToFirestore(List<CartItem> items) async {
+    final uid = currentUid;
+    if (uid == null) return;
+
+    await _firestore.collection('carts').doc(uid).set({
+      'userId': uid,
+      'items': items
+          .map((i) => {
+                'productId': i.product.id,
+                'productName': i.product.name,
+                'quantity': i.quantity,
+                'price': i.product.numericPrice,
+                'image': i.product.image,
+              })
+          .toList(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  /// Stream Cart items for current user
+  Stream<DocumentSnapshot<Map<String, dynamic>>> streamUserCart() {
+    final uid = currentUid;
+    if (uid == null) return const Stream.empty();
+    return _firestore.collection('carts').doc(uid).snapshots();
+  }
+
+  // =========================================================================
+  // 5. WISHLISTS (Document ID: User UID)
+  // =========================================================================
+
+  /// Toggle product in wishlist
+  Future<void> toggleWishlist(String productId) async {
+    final uid = currentUid;
+    if (uid == null) return;
+
+    final docRef = _firestore.collection('wishlists').doc(uid);
+    final doc = await docRef.get();
+
+    if (doc.exists) {
+      final List<dynamic> list = doc.data()?['productIds'] ?? [];
+      if (list.contains(productId)) {
+        await docRef.update({
+          'productIds': FieldValue.arrayRemove([productId]),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      } else {
+        await docRef.update({
+          'productIds': FieldValue.arrayUnion([productId]),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+    } else {
+      await docRef.set({
+        'userId': uid,
+        'productIds': [productId],
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    }
+  }
+
+  /// Stream wishlist product IDs for the current user
+  Stream<List<String>> streamWishlistIds() {
+    final uid = currentUid;
+    if (uid == null) return Stream.value([]);
+
+    return _firestore
+        .collection('wishlists')
+        .doc(uid)
+        .snapshots()
+        .map((snap) {
+      if (!snap.exists) return [];
+      final list = snap.data()?['productIds'];
+      if (list is List) {
+        return list.map((e) => e.toString()).toList();
+      }
+      return [];
+    });
+  }
+
+  // =========================================================================
+  // 6. ORDERS (CRUD)
   // =========================================================================
 
   /// Place an order and save in Firestore
@@ -211,9 +349,12 @@ class FirebaseService {
       'userId': currentUid ?? 'guest',
       'customerName': customerName,
       'phone': phone,
-      'address': address,
+      'deliveryAddress': address,
       'paymentMethod': paymentLabel,
-      'status': 'Processing', // 'Processing', 'Pick Up', 'In Progress', 'Shipped', 'Delivered', 'Cancelled'
+      'paymentStatus': 'Completed',
+      'orderStatus': 'Processing',
+      'status': 'Processing',
+      'totalAmount': total,
       'subtotal': subtotal,
       'tax': tax,
       'shipping': shipping,
@@ -224,9 +365,10 @@ class FirebaseService {
       'items': items
           .map((i) => {
                 'productId': i.product.id,
-                'name': i.product.name,
+                'productName': i.product.name,
                 'price': i.product.numericPrice,
                 'quantity': i.quantity,
+                'imageUrl': i.product.image,
                 'image': i.product.image,
               })
           .toList(),
@@ -236,24 +378,16 @@ class FirebaseService {
     return orderId;
   }
 
-  /// Update order status (Processing, Pick Up, In Progress, Shipped, Delivered, Cancelled)
+  /// Update order status
   Future<void> updateOrderStatus(String orderId, String newStatus) async {
     await _firestore.collection('orders').doc(orderId).update({
+      'orderStatus': newStatus,
       'status': newStatus,
       'updatedAt': FieldValue.serverTimestamp(),
     });
   }
 
-  /// Assign order to delivery staff
-  Future<void> assignOrder(String orderId, String staffNameOrId) async {
-    await _firestore.collection('orders').doc(orderId).update({
-      'assignedStaff': staffNameOrId,
-      'status': 'In Progress',
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
-  }
-
-  /// Stream of all orders for Admin
+  /// Stream all orders for Admin
   Stream<QuerySnapshot<Map<String, dynamic>>> streamAllOrders() {
     return _firestore
         .collection('orders')
@@ -261,36 +395,86 @@ class FirebaseService {
         .snapshots();
   }
 
-  /// Stream of orders by specific status
-  Stream<QuerySnapshot<Map<String, dynamic>>> streamOrdersByStatus(String status) {
-    return _firestore
-        .collection('orders')
-        .where('status', isEqualTo: status)
-        .snapshots();
-  }
-
-  /// Stream of orders for current customer
+  /// Stream orders for current customer
   Stream<QuerySnapshot<Map<String, dynamic>>> streamCustomerOrders() {
     final uid = currentUid;
-    if (uid == null) {
-      return const Stream.empty();
-    }
+    if (uid == null) return const Stream.empty();
     return _firestore
         .collection('orders')
         .where('userId', isEqualTo: uid)
         .snapshots();
   }
 
-  /// Stream single order by ID
-  Stream<DocumentSnapshot<Map<String, dynamic>>> streamOrder(String orderId) {
-    return _firestore.collection('orders').doc(orderId).snapshots();
+  // =========================================================================
+  // 7. SEEDING INITIAL PRODUCTS & CATEGORIES
+  // =========================================================================
+
+  /// Seed initial categories and products into Firestore if collections are empty
+  Future<void> seedInitialDataIfEmpty() async {
+    try {
+      // 1. Seed categories
+      final catSnap = await _firestore.collection('categories').limit(1).get();
+      if (catSnap.docs.isEmpty) {
+        final initialCategories = [
+          'Power Tools',
+          'Hand Tools',
+          'Fasteners',
+          'Plumbing',
+          'Electrical',
+          'Safety',
+          'Building Materials',
+          'Equipment',
+          'Tool Kits',
+        ];
+        for (final cat in initialCategories) {
+          await _firestore.collection('categories').add({
+            'categoryName': cat,
+            'description': 'High performance industrial $cat',
+            'imageUrl': '',
+            'isActive': true,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+        }
+      }
+
+      // 2. Seed products
+      final prodSnap = await _firestore.collection('products').limit(1).get();
+      if (prodSnap.docs.isEmpty) {
+        for (final p in kSampleProducts) {
+          await _firestore.collection('products').doc(p.id).set({
+            'productId': p.id,
+            'productName': p.name,
+            'name': p.name,
+            'categoryId': p.category,
+            'category': p.category,
+            'numericPrice': p.numericPrice,
+            'price': p.price,
+            'stock': p.stock,
+            'stockCount': 100,
+            'brand': 'BuildTech',
+            'description': p.description,
+            'imageUrl': p.image,
+            'image': p.image,
+            'shortInfo': p.shortInfo,
+            'specifications': p.specifications,
+            'material': p.material,
+            'size': p.size,
+            'isAvailable': true,
+            'isActive': true,
+            'createdAt': FieldValue.serverTimestamp(),
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Seeding error: $e');
+    }
   }
 
   // =========================================================================
-  // 4. NOTIFICATIONS
+  // 8. NOTIFICATIONS & REVIEWS
   // =========================================================================
 
-  /// Stream of notifications
   Stream<QuerySnapshot<Map<String, dynamic>>> streamNotifications() {
     final uid = currentUid;
     return _firestore
@@ -299,7 +483,6 @@ class FirebaseService {
         .snapshots();
   }
 
-  /// Add a notification
   Future<void> addNotification({
     required String title,
     required String message,
@@ -314,74 +497,9 @@ class FirebaseService {
     });
   }
 
-  /// Mark notification as read
   Future<void> markNotificationRead(String notificationId, bool isRead) async {
     await _firestore.collection('notifications').doc(notificationId).update({
       'isRead': isRead,
     });
-  }
-
-  // =========================================================================
-  // 5. WISHLIST
-  // =========================================================================
-
-  /// Toggle product in wishlist in Firestore
-  Future<void> toggleWishlist(String productId) async {
-    final uid = currentUid;
-    if (uid == null) return;
-
-    final docRef = _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('wishlist')
-        .doc(productId);
-
-    final doc = await docRef.get();
-    if (doc.exists) {
-      await docRef.delete();
-    } else {
-      await docRef.set({
-        'productId': productId,
-        'addedAt': FieldValue.serverTimestamp(),
-      });
-    }
-  }
-
-  /// Stream wishlist product IDs for the current user
-  Stream<List<String>> streamWishlistIds() {
-    final uid = currentUid;
-    if (uid == null) return Stream.value([]);
-
-    return _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('wishlist')
-        .snapshots()
-        .map((snap) => snap.docs.map((d) => d.id).toList());
-  }
-
-  // =========================================================================
-  // 6. CATEGORIES & STATS (Dashboard)
-  // =========================================================================
-
-  /// Stream dashboard statistics
-  Future<Map<String, dynamic>> fetchAdminDashboardStats() async {
-    try {
-      final productsCount = (await _firestore.collection('products').count().get()).count;
-      final ordersCount = (await _firestore.collection('orders').count().get()).count;
-      final customersCount = (await _firestore.collection('users').where('role', isEqualTo: 'Customer').count().get()).count;
-
-      return {
-        'totalProducts': productsCount ?? 0,
-        'totalOrders': ordersCount ?? 0,
-        'totalCustomers': customersCount ?? 0,
-      };
-    } catch (_) {
-      return {
-        'totalProducts': 0,
-        'totalOrders': 0,
-        'totalCustomers': 0,
-      };
-    }
   }
 }

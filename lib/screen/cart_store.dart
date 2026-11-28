@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:hardware_manufacturing/screen/product_model.dart';
+import 'package:hardware_manufacturing/screen/firebase_service.dart';
 
 class CartItem {
   const CartItem({required this.product, required this.quantity});
@@ -24,6 +25,9 @@ class CartStore {
 
   static void _notify() {
     cartChangeNotifier.value++;
+    try {
+      FirebaseService.instance.syncCartToFirestore(items);
+    } catch (_) {}
   }
 
   static void addProduct(Product product, [int quantity = 1]) {

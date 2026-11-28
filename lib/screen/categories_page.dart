@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hardware_manufacturing/screen/common_widgets.dart';
+import 'package:hardware_manufacturing/screen/firebase_service.dart';
 
 class CategoriesPage extends StatelessWidget {
   const CategoriesPage({super.key});
 
-  final List<String> categories = const [
+  final List<String> fallbackCategories = const [
     'Power Tools',
     'Hand Tools',
     'Fasteners', 
@@ -41,17 +43,33 @@ class CategoriesPage extends StatelessWidget {
           ),
         ),
         child: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            children: [
-              for (final cat in categories) ...[
-                _categoryTile(context, cat),
-                const SizedBox(height: 14),
-              ],
-              const SizedBox(height: 16),
-              _addProductButton(context),
-              const SizedBox(height: 20),
-            ],
+          child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: FirebaseService.instance.streamCategories(),
+            builder: (context, snapshot) {
+              List<String> list = [];
+              if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+                list = snapshot.data!.docs
+                    .map((d) => (d.data()['categoryName'] ?? '').toString())
+                    .where((name) => name.isNotEmpty)
+                    .toList();
+              }
+              if (list.isEmpty) {
+                list = fallbackCategories;
+              }
+
+              return ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                children: [
+                  for (final cat in list) ...[
+                    _categoryTile(context, cat),
+                    const SizedBox(height: 14),
+                  ],
+                  const SizedBox(height: 16),
+                  _addProductButton(context),
+                  const SizedBox(height: 20),
+                ],
+              );
+            },
           ),
         ),
       ),

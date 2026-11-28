@@ -38,10 +38,20 @@ import 'package:hardware_manufacturing/screen/role_selection_page.dart';
 import 'package:hardware_manufacturing/screen/setting.dart';
 import 'package:hardware_manufacturing/screen/wishlist_page.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:hardware_manufacturing/firebase_options.dart';
+import 'package:hardware_manufacturing/screen/firebase_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    // Seed sample product and category data into Firestore if empty
+    await FirebaseService.instance.seedInitialDataIfEmpty();
+  } catch (e) {
+    debugPrint('Firebase initialization error: $e');
+  }
   runApp(const MyApp());
 }
 
